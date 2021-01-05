@@ -1,0 +1,16 @@
+{
+  "images" : [
+    {
+      "filename" : "cashondelivery-1024x921.png",
+      "idiom" : "iphone"
+    },
+    {
+      "filename" : "cashondelivery-1024x921-1.png",
+      "idiom" : "ipad"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
