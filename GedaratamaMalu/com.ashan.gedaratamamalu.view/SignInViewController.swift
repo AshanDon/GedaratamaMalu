@@ -1,0 +1,213 @@
+//
+//  SignInViewController.swift
+//  GedaratamaMalu
+//
+//  Created by Ashan Don on 1/4/21.
+//
+
+import UIKit
+
+class SignInViewController: UIViewController {
+
+    @IBOutlet weak var backgroundImageView : UIImageView!
+    
+    @IBOutlet weak var userNameField : UITextField!
+    
+    @IBOutlet weak var passwordField : UITextField!
+    
+    @IBOutlet weak var signInButton : UIButton!
+    
+    @IBOutlet weak var registerButton : UIButton!
+    
+    @IBOutlet weak var scrollView : UIScrollView!
+    
+    private lazy var touchView : UIView = {
+        
+        let tv = UIView()
+        
+        tv.frame = backgroundImageView.bounds
+        
+        tv.isUserInteractionEnabled = true
+        
+        let viewTGR = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        
+        tv.addGestureRecognizer(viewTGR)
+        
+        return tv
+    }()
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        userNameField.delegate = self
+        
+        passwordField.delegate = self
+
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        changeComponant()
+        
+        registedKeyboardEvent()
+        
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        disappearKeyboardEvent()
+    }
+    
+    private func changeComponant(){
+        
+        // UIImageView
+        backgroundImageView.layer.opacity = Float(72)
+        
+        backgroundImageView.alpha = 0.7
+        
+        //UIButton
+        signInButton.layer.cornerRadius = signInButton.frame.height / 2
+        
+        registerButton.layer.cornerRadius = registerButton.frame.height / 2
+        
+        //UITextField
+        userNameField.backgroundColor = .secondarySystemBackground
+        
+        passwordField.backgroundColor = .secondarySystemBackground
+        
+        userNameField.attributedPlaceholder = NSAttributedString(string: "User Name", attributes: [
+            
+            NSAttributedString.Key.font : UIFont.systemFont(ofSize: 16)
+            
+        ])
+        
+        passwordField.attributedPlaceholder = NSAttributedString(string: "Password", attributes: [
+        
+            NSAttributedString.Key.font : UIFont.systemFont(ofSize: 16)
+        
+        ])
+        
+        userNameField.tintColor = UIColor.darkGray
+        
+        passwordField.tintColor = UIColor.darkGray
+        
+        userNameField.setLeftPaddingPoints(10)
+        
+        userNameField.setRightPaddingPoints(10)
+        
+        passwordField.setLeftPaddingPoints(10)
+        
+        passwordField.setRightPaddingPoints(10)
+        
+    }
+    
+    @objc private func dismissKeyboard(){
+        
+        view.endEditing(true)
+        
+    }
+    
+    private func registedKeyboardEvent(){
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHidden(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+        
+    }
+    
+    private func disappearKeyboardEvent(){
+        
+        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillShowNotification, object: nil)
+        
+        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
+        
+    }
+    
+    @objc private func keyboardWillShow(_ sender : Notification){
+        
+        scrollView.isScrollEnabled = true
+        
+        UIView.animate(withDuration: 0.1) { [weak self] in
+
+            guard let strongeSelf = self else { return }
+
+            guard let keyboardSize = (sender.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue else {
+                
+                return
+                
+            }
+            
+            let edgeInsets = UIEdgeInsets(top: 0.0, left: 0.0, bottom: keyboardSize.height , right: 0.0)
+            
+            strongeSelf.scrollView.contentInset = edgeInsets
+            
+            strongeSelf.scrollView.scrollIndicatorInsets = edgeInsets
+            
+            strongeSelf.view.addSubview(strongeSelf.touchView)
+
+        }
+    }
+    
+    @objc private func keyboardWillHidden(_ sender : Notification){
+        
+        UIView.animate(withDuration: 0.1) { [weak self] in
+
+            guard let strongeSelf = self else { return }
+            
+            let edgeInsets = UIEdgeInsets(top: 0.0, left: 0.0, bottom: 0.0, right: 0.0)
+            
+            strongeSelf.scrollView.contentInset = edgeInsets
+            
+            strongeSelf.scrollView.scrollIndicatorInsets = edgeInsets
+            
+            strongeSelf.touchView.removeFromSuperview()
+            
+            strongeSelf.scrollView.isScrollEnabled = false
+        }
+        
+        
+    }
+    
+    private func presentedAlert(_ message : String){
+        
+        let alert = UIAlertController(title: "Alert", message: message, preferredStyle: .alert)
+        
+        let okAction = UIAlertAction(title: "Ok", style: .default) { (action) in
+            
+            alert.dismiss(animated: true, completion: nil)
+            
+        }
+        
+        alert.addAction(okAction)
+        
+        self.present(alert, animated: true, completion: nil)
+        
+    }
+    
+    @IBAction private func loginButtonPressed(){
+    
+        if userNameField.text!.isEmpty || passwordField.text!.isEmpty {
+            
+            presentedAlert("User Name or password is Empty")
+            
+        } else {
+          print("present main view")
+        }
+    }
+    
+    @IBAction private func registerButtonPressed(){
+        
+    }
+}
+
+extension SignInViewController : UITextFieldDelegate {
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        
+        textField.endEditing(true)
+        
+        return true
+    }
+}
