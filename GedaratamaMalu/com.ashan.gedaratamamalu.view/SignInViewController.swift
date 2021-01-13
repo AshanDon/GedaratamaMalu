@@ -21,6 +21,20 @@ class SignInViewController: UIViewController {
     
     @IBOutlet weak var scrollView : UIScrollView!
     
+    private var moveLogoAnimator : UIViewPropertyAnimator!
+    
+    private lazy var logoImageView : UIImageView = {
+       
+        let imageView = UIImageView(image: UIImage(named: "Star_Icon")!)
+        
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        
+        imageView.layer.cornerRadius = imageView.frame.height / 2
+        
+        return imageView
+        
+    }()
+    
     private lazy var touchView : UIView = {
         
         let tv = UIView()
@@ -39,16 +53,53 @@ class SignInViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        scrollView.addSubview(logoImageView)
+        
+        NSLayoutConstraint.activate([
+            logoImageView.widthAnchor.constraint(equalToConstant: CGFloat(99.0)),
+            logoImageView.heightAnchor.constraint(equalToConstant: CGFloat(99.0)),
+            logoImageView.centerXAnchor.constraint(equalTo: scrollView.centerXAnchor),
+            logoImageView.centerYAnchor.constraint(equalTo: scrollView.centerYAnchor)
+        ])
+        
+        scrollView.transform = CGAffineTransform(scaleX: 0, y: 0)
+        
+        userNameField.alpha = CGFloat(0)
+        
+        passwordField.alpha = CGFloat(0)
+        
+        signInButton.alpha = CGFloat(0)
+        
+        registerButton.alpha = CGFloat(0)
+        
         userNameField.delegate = self
         
         passwordField.delegate = self
 
     }
-
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        changeComponant()
+        
+    }
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        changeComponant()
+        UIView.animate(withDuration: 0.8, delay: 1, usingSpringWithDamping: 0.5, initialSpringVelocity: 2, options: .curveEaseInOut) { [weak self] in
+            
+            guard let strongeSelf = self else { return }
+            
+            strongeSelf.scrollView.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
+            
+        } completion: { (success) in
+           
+            self.setupMoveLogoAnimator()
+            
+            self.moveLogoAnimator.startAnimation()
+        }
         
         registedKeyboardEvent()
         
@@ -56,7 +107,7 @@ class SignInViewController: UIViewController {
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        
+
         disappearKeyboardEvent()
     }
     
@@ -198,6 +249,54 @@ class SignInViewController: UIViewController {
     }
     
     @IBAction private func registerButtonPressed(){
+        
+        let registerVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(identifier: "REGISTER_SCREEN") as RegisterViewController
+        
+        registerVC.modalTransitionStyle = .coverVertical
+        
+        registerVC.modalPresentationStyle = .fullScreen
+        
+        self.present(registerVC, animated: true, completion: nil)
+        
+    }
+    
+    private func setupMoveLogoAnimator(){
+        
+        moveLogoAnimator = UIViewPropertyAnimator(duration: 2.0, curve: .easeOut, animations: nil)
+        
+        moveLogoAnimator.addAnimations({ [weak self] in
+            
+            guard let strongeSelf = self else { return }
+            
+            strongeSelf.logoImageView.frame.origin.y = 130
+            
+        }, delayFactor: 0.2)
+        
+        moveLogoAnimator.addAnimations({ [weak self] in
+            
+            guard let strongeSelf = self else { return }
+            
+            strongeSelf.userNameField.alpha = CGFloat(1.0)
+            
+        }, delayFactor: 0.6)
+        
+        moveLogoAnimator.addAnimations({ [weak self] in
+            
+            guard let strongeSelf = self else { return }
+            
+            strongeSelf.passwordField.alpha = CGFloat(1.0)
+            
+        }, delayFactor: 0.7)
+        
+        moveLogoAnimator.addAnimations({ [weak self] in
+            
+            guard let strongeSelf = self else { return }
+            
+            strongeSelf.signInButton.alpha = CGFloat(1.0)
+            
+            strongeSelf.registerButton.alpha = CGFloat(1.0)
+            
+        }, delayFactor: 0.8)
         
     }
 }
