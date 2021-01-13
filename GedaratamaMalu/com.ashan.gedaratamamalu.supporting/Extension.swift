@@ -28,4 +28,72 @@ extension UITextField {
         self.rightViewMode = .always
         
     }
+    
+    func setTintColor(_ color : UIColor){
+        
+        self.tintColor = color
+        
+    }
+    
+    func setBackgroundColor(){
+        
+        self.backgroundColor = .secondarySystemBackground
+        
+    }
+    
+    func setBottomBorder(backgroundColor: UIColor,shadowColor : UIColor){
+        
+        self.borderStyle = .none
+        
+        let border = CALayer()
+        let width = CGFloat(1.0)
+        border.borderColor = shadowColor.cgColor
+        border.frame = CGRect(x: 0, y: self.frame.size.height - width,   width:  self.frame.size.width, height: self.frame.size.height)
+        border.borderWidth = width
+        self.layer.addSublayer(border)
+        self.layer.masksToBounds = true
+        
+    }
+}
+
+extension UIView{
+    
+    func applyViewShadow(color : UIColor, alpha : Float, x : CGFloat, y : CGFloat, blur : CGFloat, spread : CGFloat){
+        
+        layer.masksToBounds = false
+        
+        layer.shadowColor = color.cgColor
+        
+        layer.shadowOpacity = alpha
+        
+        layer.shadowOffset = CGSize(width: x, height: y)
+        
+        layer.shadowRadius = blur / UIScreen.main.scale
+        
+        if spread == 0 {
+            
+            layer.shadowPath = nil
+            
+        } else {
+            
+            let dx = -spread
+            
+            let rect = bounds.insetBy(dx: dx, dy: dx)
+            
+            layer.shadowPath = UIBezierPath(rect: rect).cgPath
+            
+        }
+    }
+    
+    func setRoundCorners(corners : UIRectCorner,redius : CGFloat){
+        
+        let path = UIBezierPath(roundedRect: bounds, byRoundingCorners: corners, cornerRadii: CGSize(width: redius, height: redius))
+        
+        let mask = CAShapeLayer()
+        
+        mask.path = path.cgPath
+        
+        self.layer.mask = mask
+        
+    }
 }
