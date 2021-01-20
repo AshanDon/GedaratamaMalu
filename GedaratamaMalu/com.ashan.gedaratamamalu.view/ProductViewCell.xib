@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="PRODUCT_CELL" id="gTV-IL-0wX" customClass="ProductViewCell" customModule="GedaratamaMalu" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="180" height="290"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                <rect key="frame" x="0.0" y="0.0" width="180" height="290"/>
+                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="5JI-nh-tMZ" userLabel="Background View">
+                        <rect key="frame" x="0.0" y="0.0" width="180" height="290"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Fish 1" translatesAutoresizingMaskIntoConstraints="NO" id="OAF-EP-HhE" userLabel="Product Image">
+                                <rect key="frame" x="0.0" y="0.0" width="180" height="165"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="165" id="LXD-A7-BrB"/>
+                                </constraints>
+                            </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Seafood" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QM0-oV-oOv" userLabel="Product Catogory">
+                                <rect key="frame" x="5" y="172" width="170" height="15"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="15" id="2Qt-Gd-5cC"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="12"/>
+                                <color key="textColor" name="Black_Color"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="747" text="Prawns(Jumbo)" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="iY1-g1-3Ee" userLabel="Product Name">
+                                <rect key="frame" x="5" y="191" width="170" height="19.5"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="18" id="ioH-Hk-PFz"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" name="HelveticaNeue-Bold" family="Helvetica Neue" pointSize="16"/>
+                                <color key="textColor" name="Black_Color"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="රු1,400.00 per kg" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Sap-Rw-6J3" userLabel="Product Price">
+                                <rect key="frame" x="5" y="220.5" width="170" height="18"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="18" id="IzG-dq-qlR"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" name="HelveticaNeue-Bold" family="Helvetica Neue" pointSize="14"/>
+                                <color key="textColor" name="Black_Color"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="6tF-Ud-lBz" userLabel="Add Cart Button">
+                                <rect key="frame" x="5" y="248.5" width="170" height="32"/>
+                                <color key="backgroundColor" name="Button_Background_Color"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="32" id="vOs-R2-fZU"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" name="HelveticaNeue-Bold" family="Helvetica Neue" pointSize="14"/>
+                                <color key="tintColor" name="Black_Color"/>
+                                <state key="normal" title="Add to Cart" image="AddToCart_Button_Icon">
+                                    <color key="titleColor" name="Black_Color"/>
+                                </state>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" name="White_Color"/>
+                        <constraints>
+                            <constraint firstItem="QM0-oV-oOv" firstAttribute="leading" secondItem="5JI-nh-tMZ" secondAttribute="leading" constant="5" id="4qj-JX-ZuT"/>
+                            <constraint firstAttribute="bottom" secondItem="6tF-Ud-lBz" secondAttribute="bottom" constant="9.5" id="6ae-sV-yBc"/>
+                            <constraint firstAttribute="trailing" secondItem="OAF-EP-HhE" secondAttribute="trailing" id="K4F-pe-fNd"/>
+                            <constraint firstItem="iY1-g1-3Ee" firstAttribute="top" secondItem="QM0-oV-oOv" secondAttribute="bottom" constant="4" id="Ucd-Uw-gin"/>
+                            <constraint firstItem="QM0-oV-oOv" firstAttribute="top" secondItem="OAF-EP-HhE" secondAttribute="bottom" constant="7" id="Yiw-AE-i6d"/>
+                            <constraint firstItem="Sap-Rw-6J3" firstAttribute="top" secondItem="iY1-g1-3Ee" secondAttribute="bottom" constant="10" id="ZYn-zy-Mg3"/>
+                            <constraint firstAttribute="trailing" secondItem="iY1-g1-3Ee" secondAttribute="trailing" constant="5" id="ahJ-eX-j8G"/>
+                            <constraint firstAttribute="trailing" secondItem="Sap-Rw-6J3" secondAttribute="trailing" constant="5" id="b7F-9p-zUz"/>
+                            <constraint firstAttribute="trailing" secondItem="QM0-oV-oOv" secondAttribute="trailing" constant="5" id="bT6-Te-kc4"/>
+                            <constraint firstItem="6tF-Ud-lBz" firstAttribute="leading" secondItem="5JI-nh-tMZ" secondAttribute="leading" constant="5" id="c8a-tn-GhC"/>
+                            <constraint firstItem="OAF-EP-HhE" firstAttribute="leading" secondItem="5JI-nh-tMZ" secondAttribute="leading" id="ddT-mH-HVS"/>
+                            <constraint firstItem="Sap-Rw-6J3" firstAttribute="leading" secondItem="5JI-nh-tMZ" secondAttribute="leading" constant="5" id="eaM-FW-Jxz"/>
+                            <constraint firstItem="OAF-EP-HhE" firstAttribute="top" secondItem="5JI-nh-tMZ" secondAttribute="top" id="pgQ-De-rix"/>
+                            <constraint firstItem="iY1-g1-3Ee" firstAttribute="leading" secondItem="5JI-nh-tMZ" secondAttribute="leading" constant="5" id="s08-sm-AW2"/>
+                            <constraint firstItem="6tF-Ud-lBz" firstAttribute="top" secondItem="Sap-Rw-6J3" secondAttribute="bottom" constant="10" id="voZ-PH-g61"/>
+                            <constraint firstAttribute="trailing" secondItem="6tF-Ud-lBz" secondAttribute="trailing" constant="5" id="wtV-1H-zh2"/>
+                        </constraints>
+                    </view>
+                </subviews>
+            </view>
+            <viewLayoutGuide key="safeArea" id="ZTg-uK-7eu"/>
+            <constraints>
+                <constraint firstItem="5JI-nh-tMZ" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" id="EUi-tK-WZz"/>
+                <constraint firstAttribute="bottom" secondItem="5JI-nh-tMZ" secondAttribute="bottom" id="PMd-UP-rRh"/>
+                <constraint firstItem="5JI-nh-tMZ" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" id="kmu-MR-asv"/>
+                <constraint firstAttribute="trailing" secondItem="5JI-nh-tMZ" secondAttribute="trailing" id="wVI-Rk-Hgs"/>
+            </constraints>
+            <connections>
+                <outlet property="addCartButton" destination="6tF-Ud-lBz" id="hyy-Oq-VE6"/>
+                <outlet property="catagoryNameLabel" destination="QM0-oV-oOv" id="GT1-vn-FA9"/>
+                <outlet property="productImage" destination="OAF-EP-HhE" id="eJD-Ts-KO9"/>
+                <outlet property="productNameLabel" destination="iY1-g1-3Ee" id="nXT-lm-l7R"/>
+                <outlet property="prouuctPrice" destination="Sap-Rw-6J3" id="Lfv-y6-A0h"/>
+            </connections>
+            <point key="canvasLocation" x="140.57971014492756" y="133.92857142857142"/>
+        </collectionViewCell>
+    </objects>
+    <resources>
+        <image name="AddToCart_Button_Icon" width="32" height="28"/>
+        <image name="Fish 1" width="1000" height="1000"/>
+        <namedColor name="Black_Color">
+            <color red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="Button_Background_Color">
+            <color red="0.0" green="0.4779999852180481" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="White_Color">
+            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+    </resources>
+</document>
