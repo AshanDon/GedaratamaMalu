@@ -13,7 +13,7 @@ class PresentController {
     
     public func isLogedIn() -> Bool {
         
-        return false
+        return true
         
     }
     
@@ -24,6 +24,16 @@ class PresentController {
         intraductionVC.modalPresentationStyle = .fullScreen
         
         return intraductionVC
+        
+    }
+    
+    public func presentTabBarVC() -> UIViewController{
+        
+        let tabarVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(identifier: "TAB_BAR_SCREEN") as TabBarViewController
+        
+        tabarVC.modalPresentationStyle = .fullScreen
+        
+        return tabarVC
         
     }
 }
