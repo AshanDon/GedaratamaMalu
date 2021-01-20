@@ -20,13 +20,20 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         window = UIWindow(windowScene: windowScene)
         
+        window?.becomeKey()
+        
         let presentVC = PresentController()
         
         if presentVC.isLogedIn() {
             //alreay logedIn
-            print("alreay logedIn")
-        } else {
             
+            let navigationController = UINavigationController(rootViewController: presentVC.presentTabBarVC())
+            
+            navigationController.setNavigationBarHidden(true, animated: false)
+            
+            window?.rootViewController = navigationController
+            
+        } else {
             
             window?.rootViewController = UINavigationController(rootViewController: presentVC.presentIntraductionVC())
             
