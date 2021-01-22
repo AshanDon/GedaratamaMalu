@@ -56,9 +56,6 @@ class HomeViewController: UIViewController {
         
         productSearchField.delegate = self
         
-        //Pendding cart item count
-        getPenddingCartItem()
-        
     }
     
     func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
@@ -97,7 +94,7 @@ class HomeViewController: UIViewController {
         } catch {
             print("Error encoding cart list \(error)")
         }
-        
+        setDataCartVC()
     }
     
     private func modifiyViewComponent(){
