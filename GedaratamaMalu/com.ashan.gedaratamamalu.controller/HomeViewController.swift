@@ -247,7 +247,6 @@ class HomeViewController: UIViewController {
             do {
                 cartList = try decode.decode([Product].self, from: data)
                 cartProductCount.text = "\(cartList.count)"
-    
             } catch {
                 print("Error decoding cart list \(error)")
             }
