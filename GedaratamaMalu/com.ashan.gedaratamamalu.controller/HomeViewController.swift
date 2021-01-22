@@ -75,6 +75,9 @@ class HomeViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
+        //Pendding cart item count
+        getPenddingCartItem()
+        
         registerForKeyboardEvent()
         
     }
@@ -253,6 +256,13 @@ class HomeViewController: UIViewController {
             }
         }
     }
+    
+    private func setDataCartVC(){
+        guard let viewControllers = tabBarController?.viewControllers else { return }
+        guard let cartVC = viewControllers[1] as? CartViewController else { return }
+        cartVC.setCartList = cartList
+        cartVC.delegate = self
+    }
 }
 
 extension HomeViewController : UICollectionViewDelegate,UICollectionViewDataSource {
@@ -304,7 +314,7 @@ extension HomeViewController : UISearchBarDelegate{
     }
 }
 
-extension HomeViewController : CartDelegete{
+extension HomeViewController : CartDelegete {
     
     func addedItemToCart(_ item: Product) {
         self.cartList.append(item)
@@ -312,4 +322,11 @@ extension HomeViewController : CartDelegete{
         self.cartProductCount.text = "\(Int(cartList.count))"
     }
     
+}
+
+extension HomeViewController : CartListDelegate {
+    func updateCartList(_ list: [Product]) {
+        self.cartList = list
+        self.cartProductCount.text = "\(cartList.count)"
+    }
 }
