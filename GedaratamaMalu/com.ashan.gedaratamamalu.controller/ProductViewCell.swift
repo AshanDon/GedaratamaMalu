@@ -22,7 +22,7 @@ class ProductViewCell: UICollectionViewCell {
             self.productImage.image = UIImage(named: productDetails.productImage)
             self.catagoryNameLabel.text = productDetails.catogaryName
             self.productNameLabel.text = productDetails.productName
-            self.prouuctPrice.text = "රු\(productDetails.productPrice) per kg"
+            self.prouuctPrice.text = "\(String(productDetails.productPrice).convertDoubleToCurrency()) per kg"
         }
     }
 
