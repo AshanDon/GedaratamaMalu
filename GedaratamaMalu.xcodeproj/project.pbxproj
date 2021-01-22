@@ -28,6 +28,9 @@
 		63D4C23F25990F0700BF9D7E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 63D4C23D25990F0700BF9D7E /* LaunchScreen.storyboard */; };
 		63D4C24A25990F0700BF9D7E /* GedaratamaMaluTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63D4C24925990F0700BF9D7E /* GedaratamaMaluTests.swift */; };
 		63D4C25525990F0800BF9D7E /* GedaratamaMaluUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63D4C25425990F0800BF9D7E /* GedaratamaMaluUITests.swift */; };
+		63ED251F25B9C1AB00D8DDA6 /* CartViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63ED251E25B9C1AB00D8DDA6 /* CartViewController.swift */; };
+		63ED252525B9D1E200D8DDA6 /* CartRowViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63ED252325B9D1E200D8DDA6 /* CartRowViewCell.swift */; };
+		63ED252625B9D1E200D8DDA6 /* CartRowViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 63ED252425B9D1E200D8DDA6 /* CartRowViewCell.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -75,6 +78,9 @@
 		63D4C25025990F0800BF9D7E /* GedaratamaMaluUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GedaratamaMaluUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		63D4C25425990F0800BF9D7E /* GedaratamaMaluUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GedaratamaMaluUITests.swift; sourceTree = "<group>"; };
 		63D4C25625990F0800BF9D7E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		63ED251E25B9C1AB00D8DDA6 /* CartViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CartViewController.swift; sourceTree = "<group>"; };
+		63ED252325B9D1E200D8DDA6 /* CartRowViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CartRowViewCell.swift; sourceTree = "<group>"; };
+		63ED252425B9D1E200D8DDA6 /* CartRowViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = CartRowViewCell.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -114,6 +120,8 @@
 				63B2FAF525AF78DC0088B6A6 /* TabBarViewController.swift */,
 				63B2FAFA25AF8A950088B6A6 /* HomeViewController.swift */,
 				63C43AA425B561B300983FED /* ProductViewController.swift */,
+				63ED251E25B9C1AB00D8DDA6 /* CartViewController.swift */,
+				63ED252325B9D1E200D8DDA6 /* CartRowViewCell.swift */,
 			);
 			path = com.ashan.gedaratamamalu.controller;
 			sourceTree = "<group>";
@@ -133,6 +141,7 @@
 				63D4C23D25990F0700BF9D7E /* LaunchScreen.storyboard */,
 				630855C7259B8A0F0072F431 /* SwipingViewCell.xib */,
 				63B25E6B25B2CADD002D970D /* ProductViewCell.xib */,
+				63ED252425B9D1E200D8DDA6 /* CartRowViewCell.xib */,
 			);
 			path = com.ashan.gedaratamamalu.view;
 			sourceTree = "<group>";
@@ -307,6 +316,7 @@
 				63D4C23F25990F0700BF9D7E /* LaunchScreen.storyboard in Resources */,
 				63D4C23C25990F0700BF9D7E /* Assets.xcassets in Resources */,
 				63D4C23A25990F0500BF9D7E /* Main.storyboard in Resources */,
+				63ED252625B9D1E200D8DDA6 /* CartRowViewCell.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -338,11 +348,13 @@
 				635C4CF425A5AAE100A9BEC8 /* RegisterViewController.swift in Sources */,
 				63BE380F25A3A30300937C35 /* SignInViewController.swift in Sources */,
 				6316FA0625AB98C800824BF4 /* MobileVerificationViewController.swift in Sources */,
+				63ED251F25B9C1AB00D8DDA6 /* CartViewController.swift in Sources */,
 				630855C8259B8A0F0072F431 /* SwipingViewCell.swift in Sources */,
 				63B2FAFB25AF8A950088B6A6 /* HomeViewController.swift in Sources */,
 				63B25E6C25B2CADD002D970D /* ProductViewCell.swift in Sources */,
 				63A8A2CB2599FD2400921E83 /* IntraductionViewController.swift in Sources */,
 				63B2FAF625AF78DC0088B6A6 /* TabBarViewController.swift in Sources */,
+				63ED252525B9D1E200D8DDA6 /* CartRowViewCell.swift in Sources */,
 				63A8A2D22599FDBD00921E83 /* PresentController.swift in Sources */,
 				639BE63925B3590D00161A5F /* Product.swift in Sources */,
 			);
