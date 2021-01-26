@@ -99,6 +99,10 @@ class HomeViewController: UIViewController {
     
     private func modifiyViewComponent(){
         
+        view.layer.opacity = Float(72)
+        
+        view.alpha = 0.7
+        
         backgroundView.layer.opacity = Float(72)
         
         backgroundView.alpha = 0.7
@@ -153,7 +157,7 @@ class HomeViewController: UIViewController {
             guard let strongeSelf = self else { return }
             guard let statusBarHeight = strongeSelf.view.window?.windowScene?.statusBarManager?.statusBarFrame.height else { return }
             strongeSelf.navigationViewTopConstraint.constant = -(strongeSelf.navigationView.frame.height + statusBarHeight)
-            strongeSelf.separetorTopConstraint.constant = statusBarHeight + 20
+            strongeSelf.separetorTopConstraint.constant = statusBarHeight + 10
             strongeSelf.middleViewTopConstraint.constant = 5
             
             strongeSelf.view.layoutIfNeeded()
