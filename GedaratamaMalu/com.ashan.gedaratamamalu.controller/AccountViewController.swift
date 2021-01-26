@@ -50,15 +50,38 @@ class AccountViewController: UIViewController {
         sideMenu.delegate = self
     }
     
+    private func presentSignInVC(){
+        let signInVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(identifier: "SIGNIN_SCREEN") as! SignInViewController
+        signInVC.modalTransitionStyle = .coverVertical
+        signInVC.modalPresentationStyle = .fullScreen
+        if let window = UIApplication.shared.windows.first{
+            window.rootViewController = signInVC
+            window.makeKeyAndVisible()
+        }
+        
+    }
+    
+    private func presentAddressVC(){
+        let addressVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(identifier: "SETUP_ADDRESS_SCREEN") as! AddressViewController
+        addressVC.modalTransitionStyle = .coverVertical
+        addressVC.modalPresentationStyle = .fullScreen
+        self.present(addressVC, animated: true, completion: nil)
+    }
+    
 }
 
 extension AccountViewController : SideMenuDelegate {
+    
+    func didPressedAddress() {
+        presentAddressVC()
+    }
+    
     func didPressedLogOut() {
         
         let alert = UIAlertController(title: "Log Out!", message: "Do you want to log out", preferredStyle: .alert)
         
         let yesAction = UIAlertAction(title: "Yes", style: .default) { (yesAction) in
-            
+            self.presentSignInVC()
         }
         
         let noAction = UIAlertAction(title: "No", style: .default) { (noAction) in
