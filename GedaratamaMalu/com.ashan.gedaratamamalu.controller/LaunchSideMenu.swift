@@ -9,6 +9,7 @@ import UIKit
 
 protocol SideMenuDelegate : class {
     func didPressedLogOut()
+    func didPressedAddress()
 }
 
 class LaunchSideMenu : NSObject {
@@ -197,7 +198,8 @@ class LaunchSideMenu : NSObject {
     }
     
     private func addressPressed(){
-        print("Address Button Done!")
+        moveRightMenuView()
+        delegate?.didPressedAddress()
     }
     
     private func accountDetailsPressed(){
