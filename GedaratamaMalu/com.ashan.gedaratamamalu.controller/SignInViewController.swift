@@ -22,6 +22,7 @@ class SignInViewController: UIViewController {
     @IBOutlet weak var scrollView : UIScrollView!
     
     private var moveLogoAnimator : UIViewPropertyAnimator!
+    private var logoIVBottomConstraint : NSLayoutConstraint!
     
     private lazy var logoImageView : UIImageView = {
        
@@ -58,9 +59,13 @@ class SignInViewController: UIViewController {
         NSLayoutConstraint.activate([
             logoImageView.widthAnchor.constraint(equalToConstant: CGFloat(99.0)),
             logoImageView.heightAnchor.constraint(equalToConstant: CGFloat(99.0)),
-            logoImageView.centerXAnchor.constraint(equalTo: scrollView.centerXAnchor),
-            logoImageView.centerYAnchor.constraint(equalTo: scrollView.centerYAnchor)
+            logoImageView.centerXAnchor.constraint(equalTo: scrollView.centerXAnchor)
+            
         ])
+        
+        logoIVBottomConstraint = logoImageView.bottomAnchor.constraint(equalTo: userNameField.topAnchor, constant: 30)
+        
+        view.addConstraint(logoIVBottomConstraint)
         
         scrollView.transform = CGAffineTransform(scaleX: 0, y: 0)
         
@@ -244,7 +249,7 @@ class SignInViewController: UIViewController {
             presentedAlert("User Name or password is Empty")
             
         } else {
-          print("present main view")
+            presentTabBarVC()
         }
     }
     
@@ -298,6 +303,25 @@ class SignInViewController: UIViewController {
             
         }, delayFactor: 0.8)
         
+        moveLogoAnimator.addCompletion { (position) in
+
+            self.logoIVBottomConstraint.constant = -30
+
+            self.view.addConstraint(self.logoIVBottomConstraint)
+            self.view.layoutIfNeeded()
+        }
+    }
+    
+    private func presentTabBarVC(){
+        let tabBarVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(identifier: "TAB_BAR_SCREEN") as! TabBarViewController
+        
+        tabBarVC.modalPresentationStyle = .fullScreen
+        tabBarVC.modalTransitionStyle = .coverVertical
+        
+        if let window = UIApplication.shared.windows.first {
+            window.rootViewController = tabBarVC
+            window.makeKeyAndVisible()
+        }
     }
 }
 
