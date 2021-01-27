@@ -68,9 +68,21 @@ class AccountViewController: UIViewController {
         self.present(addressVC, animated: true, completion: nil)
     }
     
+    private func presentAccountDVC(){
+        let accountDetailVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(identifier: "ACCOUNT_DETAILS") as! AccountDetailViewController
+        accountDetailVC.modalTransitionStyle = .coverVertical
+        accountDetailVC.modalPresentationStyle = .fullScreen
+        self.present(accountDetailVC, animated: true, completion: nil)
+    }
+    
 }
 
 extension AccountViewController : SideMenuDelegate {
+    
+    func didPressedAccountDetail() {
+        presentAccountDVC()
+    }
+    
     
     func didPressedAddress() {
         presentAddressVC()
