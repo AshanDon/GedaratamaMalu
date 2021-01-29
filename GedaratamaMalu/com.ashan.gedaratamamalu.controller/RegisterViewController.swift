@@ -402,7 +402,6 @@ class RegisterViewController: UIViewController {
             verificationVC.modalTransitionStyle = .crossDissolve
             
             let mobileNo = "\(countryCodeField.text!)\(contactField.text!)"
-            
             verificationVC.mobileNumber = mobileNo
 
             self.present(verificationVC, animated: true, completion: nil)
