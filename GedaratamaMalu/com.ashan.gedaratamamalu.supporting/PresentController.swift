@@ -13,7 +13,7 @@ class PresentController {
     
     public func isLogedIn() -> Bool {
         
-        return true
+        return false
         
     }
     
