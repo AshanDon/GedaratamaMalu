@@ -30,6 +30,18 @@ class MobileVerificationViewController: UIViewController {
     
     public var mobileNumber : String?
     
+    //https://numverify.com/dashboard
+    
+    private lazy var blackView : UIView = {
+       let bView = UIView()
+        bView.isUserInteractionEnabled = true
+        bView.frame = view.bounds
+        bView.backgroundColor =  UIColor(white: 0, alpha: 0.7)
+        bView.alpha = 0
+        bView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(smsViewDismiss)))
+        return bView
+    }()
+    
     private lazy var resendSMSView : UIView = {
        
         let backgroundView = UIView()
@@ -254,7 +266,10 @@ class MobileVerificationViewController: UIViewController {
         
         digit4Field.delegate = self
         
-        view.addSubview(resendSMSView)
+//        view.addSubview(resendSMSView)
+        
+        view.addSubview(self.blackView)
+        view.addSubview(self.resendSMSView)
         
         NSLayoutConstraint.activate([
             
@@ -379,6 +394,8 @@ class MobileVerificationViewController: UIViewController {
             
         }
         
+        self.blackView.alpha = 1
+        
         UIView.animate(withDuration: 0.7, delay: 0, options: .curveEaseOut, animations: {
             
             self.bottomViewConstraint.constant = -0
@@ -397,6 +414,7 @@ class MobileVerificationViewController: UIViewController {
             
             self.view.layoutIfNeeded()
             
+            self.blackView.alpha = 0
         }, completion: nil)
         
     }
@@ -439,6 +457,7 @@ extension MobileVerificationViewController : UITextFieldDelegate {
                 
             case digit4Field:
                 nextButton.isEnabled = true
+                view.endEditing(true)
                 break
                 
             default:
