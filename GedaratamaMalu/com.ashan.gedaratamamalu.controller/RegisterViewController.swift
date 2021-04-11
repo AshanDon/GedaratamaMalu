@@ -27,6 +27,8 @@ class RegisterViewController: UIViewController {
     
     @IBOutlet weak var emailField: UITextField!
     
+    @IBOutlet weak var userNameField: UITextField!
+    
     @IBOutlet weak var passwordField: UITextField!
     
     @IBOutlet weak var rePasswordField: UITextField!
@@ -167,6 +169,8 @@ class RegisterViewController: UIViewController {
         contactField.delegate = self
         
         emailField.delegate = self
+        
+        userNameField.delegate = self
         
         passwordField.delegate = self
         
@@ -335,6 +339,21 @@ class RegisterViewController: UIViewController {
             
         ])
         
+        userNameField.setTintColor(.darkGray)
+        
+        userNameField.setBackgroundColor()
+        
+        userNameField.setLeftPaddingPoints(5)
+        
+        userNameField.setRightPaddingPoints(5)
+        
+        //Password Field
+        userNameField.attributedPlaceholder = NSAttributedString(string: "User Name", attributes: [
+            
+            NSAttributedString.Key.font : UIFont.systemFont(ofSize: 16)
+            
+        ])
+        
         passwordField.setTintColor(.darkGray)
         
         passwordField.setBackgroundColor()
@@ -387,6 +406,8 @@ class RegisterViewController: UIViewController {
             showAlertMessage("Enter your valid mobile number")
         } else if emailField.text!.isEmpty {
             showAlertMessage("Enter your valid email address")
+        } else if userNameField.text!.isEmpty {
+            showAlertMessage("Enter your user name")
         } else if passwordField.text!.isEmpty {
             showAlertMessage("Enter your password")
         } else if rePasswordField.text!.isEmpty {
@@ -595,6 +616,8 @@ extension RegisterViewController : UITextFieldDelegate {
         } else if textField.attributedPlaceholder!.string.elementsEqual("Mobile No"){
             emailField.becomeFirstResponder()
         } else if textField.attributedPlaceholder!.string.elementsEqual("Email"){
+            userNameField.becomeFirstResponder()
+        } else if textField.attributedPlaceholder!.string.elementsEqual("User Name"){
             passwordField.becomeFirstResponder()
         } else if textField.attributedPlaceholder!.string.elementsEqual("Password"){
             rePasswordField.becomeFirstResponder()
