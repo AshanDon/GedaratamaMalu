@@ -1351,10 +1351,10 @@
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3c3-LE-kMU" userLabel="Middle View">
-                                        <rect key="frame" x="10" y="142" width="355" height="383"/>
+                                        <rect key="frame" x="10" y="142" width="355" height="442"/>
                                         <subviews>
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacing="15" translatesAutoresizingMaskIntoConstraints="NO" id="d76-NT-xvG" userLabel="Register Stack View">
-                                                <rect key="frame" x="10" y="22" width="335" height="339"/>
+                                                <rect key="frame" x="10" y="22" width="335" height="398"/>
                                                 <subviews>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="pO0-gQ-rFt" userLabel="Register Row 1">
                                                         <rect key="frame" x="0.0" y="0.0" width="335" height="44"/>
@@ -1450,10 +1450,10 @@
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="JnD-Ld-jTh" userLabel="Register Row 4">
                                                         <rect key="frame" x="0.0" y="177" width="335" height="44"/>
                                                         <subviews>
-                                                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Snf-Tb-3ah" userLabel="Password Text Field">
+                                                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Snf-Tb-3ah" userLabel="UserName Text Field">
                                                                 <rect key="frame" x="0.0" y="0.0" width="335" height="44"/>
                                                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                                                <textInputTraits key="textInputTraits" returnKeyType="continue" enablesReturnKeyAutomatically="YES" secureTextEntry="YES" textContentType="password"/>
+                                                                <textInputTraits key="textInputTraits" returnKeyType="continue" enablesReturnKeyAutomatically="YES" textContentType="username"/>
                                                             </textField>
                                                         </subviews>
                                                         <constraints>
@@ -1463,8 +1463,24 @@
                                                             <constraint firstAttribute="bottom" secondItem="Snf-Tb-3ah" secondAttribute="bottom" id="sNH-Xg-geU"/>
                                                         </constraints>
                                                     </view>
-                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="PAo-MV-4BG" userLabel="Register Row 5">
+                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="T7n-JN-Qt7" userLabel="Register Row 5">
                                                         <rect key="frame" x="0.0" y="236" width="335" height="44"/>
+                                                        <subviews>
+                                                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="7XE-ym-GgR" userLabel="Password Text Field">
+                                                                <rect key="frame" x="0.0" y="0.0" width="335" height="44"/>
+                                                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                                <textInputTraits key="textInputTraits" returnKeyType="continue" enablesReturnKeyAutomatically="YES" secureTextEntry="YES" textContentType="password"/>
+                                                            </textField>
+                                                        </subviews>
+                                                        <constraints>
+                                                            <constraint firstItem="7XE-ym-GgR" firstAttribute="top" secondItem="T7n-JN-Qt7" secondAttribute="top" id="BZW-b1-efZ"/>
+                                                            <constraint firstItem="7XE-ym-GgR" firstAttribute="leading" secondItem="T7n-JN-Qt7" secondAttribute="leading" id="QZF-4O-s1o"/>
+                                                            <constraint firstAttribute="bottom" secondItem="7XE-ym-GgR" secondAttribute="bottom" id="Yvu-hF-dac"/>
+                                                            <constraint firstAttribute="trailing" secondItem="7XE-ym-GgR" secondAttribute="trailing" id="xIx-hg-V46"/>
+                                                        </constraints>
+                                                    </view>
+                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="PAo-MV-4BG" userLabel="Register Row 6">
+                                                        <rect key="frame" x="0.0" y="295" width="335" height="44"/>
                                                         <subviews>
                                                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="J2P-xT-2tu" userLabel="Repassword Text Field">
                                                                 <rect key="frame" x="0.0" y="0.0" width="335" height="44"/>
@@ -1479,8 +1495,8 @@
                                                             <constraint firstAttribute="bottom" secondItem="J2P-xT-2tu" secondAttribute="bottom" id="y4X-4b-FCp"/>
                                                         </constraints>
                                                     </view>
-                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="i4c-qa-aoN" userLabel="Register Row 6">
-                                                        <rect key="frame" x="0.0" y="295" width="335" height="44"/>
+                                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="i4c-qa-aoN" userLabel="Register Row 7">
+                                                        <rect key="frame" x="0.0" y="354" width="335" height="44"/>
                                                         <subviews>
                                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="mJq-hB-2L5">
                                                                 <rect key="frame" x="0.0" y="0.0" width="335" height="44"/>
@@ -1506,11 +1522,14 @@
                                         </subviews>
                                         <color key="backgroundColor" name="Subview_Background_Color"/>
                                         <constraints>
+                                            <constraint firstAttribute="trailing" secondItem="d76-NT-xvG" secondAttribute="trailing" constant="10" id="AjJ-J6-91s"/>
+                                            <constraint firstItem="d76-NT-xvG" firstAttribute="leading" secondItem="3c3-LE-kMU" secondAttribute="leading" constant="10" id="BpW-nO-RZN"/>
+                                            <constraint firstItem="d76-NT-xvG" firstAttribute="top" secondItem="3c3-LE-kMU" secondAttribute="top" constant="22" id="JKm-Lm-dSu"/>
+                                            <constraint firstAttribute="bottom" secondItem="d76-NT-xvG" secondAttribute="bottom" constant="22" id="VWb-Al-i72"/>
                                             <constraint firstAttribute="trailing" secondItem="d76-NT-xvG" secondAttribute="trailing" constant="10" id="ZBq-ML-qFV"/>
                                             <constraint firstItem="d76-NT-xvG" firstAttribute="leading" secondItem="3c3-LE-kMU" secondAttribute="leading" constant="10" id="ZlR-W6-XjK"/>
-                                            <constraint firstAttribute="bottom" secondItem="d76-NT-xvG" secondAttribute="bottom" constant="22" id="eMF-Wp-JSS"/>
                                             <constraint firstItem="d76-NT-xvG" firstAttribute="top" secondItem="3c3-LE-kMU" secondAttribute="top" constant="22" id="gaz-RP-toM"/>
-                                            <constraint firstAttribute="height" constant="383" id="mJN-la-kjm"/>
+                                            <constraint firstAttribute="height" constant="442" id="mJN-la-kjm"/>
                                         </constraints>
                                     </view>
                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Close_Icon" translatesAutoresizingMaskIntoConstraints="NO" id="Gf3-7z-do9">
@@ -1535,7 +1554,7 @@
                                     <constraint firstItem="3c3-LE-kMU" firstAttribute="trailing" secondItem="Gf3-7z-do9" secondAttribute="trailing" id="Gao-Rr-WOV"/>
                                     <constraint firstItem="Kzr-dg-YGA" firstAttribute="trailing" secondItem="Gf3-7z-do9" secondAttribute="trailing" constant="10" id="QEN-Nh-BKV"/>
                                     <constraint firstItem="3c3-LE-kMU" firstAttribute="top" secondItem="x9d-yk-KMq" secondAttribute="bottom" constant="10" id="THX-Hy-78S"/>
-                                    <constraint firstItem="3c3-LE-kMU" firstAttribute="centerY" secondItem="aDa-hc-sgz" secondAttribute="centerY" id="aFv-8k-KoX"/>
+                                    <constraint firstItem="3c3-LE-kMU" firstAttribute="centerY" secondItem="aDa-hc-sgz" secondAttribute="centerY" constant="29.5" id="aFv-8k-KoX"/>
                                     <constraint firstAttribute="bottom" secondItem="Gf3-7z-do9" secondAttribute="bottom" constant="627" id="cGc-eI-Yag"/>
                                     <constraint firstItem="x9d-yk-KMq" firstAttribute="leading" secondItem="Kzr-dg-YGA" secondAttribute="leading" constant="24" id="cUg-J5-Kcd"/>
                                     <constraint firstAttribute="trailing" secondItem="Gf3-7z-do9" secondAttribute="trailing" constant="10" id="gZe-oh-KHj"/>
@@ -1571,10 +1590,11 @@
                         <outlet property="firstNameField" destination="yJs-P1-FII" id="gSI-Ee-jb2"/>
                         <outlet property="lastNameField" destination="SIr-H5-p4f" id="t57-tF-zwO"/>
                         <outlet property="middleView" destination="3c3-LE-kMU" id="xip-De-U7p"/>
-                        <outlet property="passwordField" destination="Snf-Tb-3ah" id="hKe-Nz-Dct"/>
+                        <outlet property="passwordField" destination="7XE-ym-GgR" id="56R-6p-vmN"/>
                         <outlet property="rePasswordField" destination="J2P-xT-2tu" id="dCT-iH-JMK"/>
                         <outlet property="registerButton" destination="mJq-hB-2L5" id="mOW-eM-wc1"/>
                         <outlet property="scrollView" destination="aDa-hc-sgz" id="oAV-6k-qpy"/>
+                        <outlet property="userNameField" destination="Snf-Tb-3ah" id="dnB-9A-ubR"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="GBR-72-5e2" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
