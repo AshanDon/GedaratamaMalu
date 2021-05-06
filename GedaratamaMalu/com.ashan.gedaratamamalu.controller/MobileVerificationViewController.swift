@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import NVActivityIndicatorView
 
 class MobileVerificationViewController: UIViewController {
     
@@ -28,9 +29,13 @@ class MobileVerificationViewController: UIViewController {
     
     private var bottomViewConstraint : NSLayoutConstraint!
     
-    public var mobileNumber : String?
+    fileprivate var otpMV : OTPViewModel!
     
-    //https://numverify.com/dashboard
+    fileprivate var jwt_Token : String!
+    
+    fileprivate var registerMV : RegisterModelView!
+    
+    var profile : Profile!
     
     private lazy var blackView : UIView = {
        let bView = UIView()
@@ -39,6 +44,14 @@ class MobileVerificationViewController: UIViewController {
         bView.backgroundColor =  UIColor(white: 0, alpha: 0.7)
         bView.alpha = 0
         bView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(smsViewDismiss)))
+        return bView
+    }()
+    
+    private lazy var animationBlackView : UIView = {
+       let bView = UIView()
+        bView.isUserInteractionEnabled = true
+        bView.frame = view.bounds
+        bView.backgroundColor = UIColor(white: 0, alpha: 0.7)
         return bView
     }()
     
@@ -253,6 +266,11 @@ class MobileVerificationViewController: UIViewController {
         
     }()
     
+    fileprivate func getDefaultJwtToken() {
+        let userDefault = UserDefaults.standard
+        self.jwt_Token = userDefault.object(forKey: "JWT_TOKEN") as? String
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -328,9 +346,13 @@ class MobileVerificationViewController: UIViewController {
 
         view.layoutIfNeeded()
         
-        if let mobileNo = mobileNumber {
-            self.mobileNoField.text = mobileNo
-        }
+        getDefaultJwtToken()
+        
+        otpMV = OTPViewModel(jwt_Token)
+        otpMV.delegate = self
+        
+        registerMV = RegisterModelView(jwt_Token)
+        registerMV.delegate = self
         
     }
     
@@ -339,6 +361,15 @@ class MobileVerificationViewController: UIViewController {
         
         didChangeCustomComponant()
         
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        if let profile = profile{
+            print(profile.mobile)
+            self.mobileNoField.text = profile.mobile
+        }
     }
 
     private func didChangeCustomComponant(){
@@ -378,7 +409,7 @@ class MobileVerificationViewController: UIViewController {
             heddingLabel.text = "Resend Code"
             messageLabel.text = "Are you sure you want to send the code to following number?"
             
-            if let mobileNo = mobileNumber{
+            if let mobileNo = profile?.mobile{
                 mobileNoLabel.text = mobileNo
             }
             
@@ -388,7 +419,7 @@ class MobileVerificationViewController: UIViewController {
             heddingLabel.text = "Resend Code from call"
             messageLabel.text = "Are you sure you want to send the code to following number?"
             
-            if let mobileNo = mobileNumber{
+            if let mobileNo = profile?.mobile{
                 mobileNoLabel.text = mobileNo
             }
             
@@ -431,6 +462,90 @@ class MobileVerificationViewController: UIViewController {
         
         self.dismiss(animated: true) {
             NotificationCenter.default.removeObserver(self, name: Notification.Name("EDIT_MOBILE_NO"), object: nil)
+        }
+    }
+    
+    fileprivate func invalidOTPMessage(){
+        
+        let alertController = UIAlertController(title: "Warning", message: "Invalid OTP code. Please try again.", preferredStyle: .alert)
+        
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { [weak self] (action) in
+            
+            guard let strongeSelf = self else { return }
+            
+            strongeSelf.digit1Field.text = nil
+            strongeSelf.digit2Field.text = nil
+            strongeSelf.digit3Field.text = nil
+            strongeSelf.digit4Field.text = nil
+            
+            strongeSelf.digit1Field.resignFirstResponder()
+            
+            alertController.dismiss(animated: true, completion: nil)
+        }
+        
+        alertController.addAction(cancelAction)
+        
+        present(alertController, animated: true, completion: nil)
+    }
+    
+    fileprivate func saveProfile(){
+        if let saveProfile = profile{
+            registerMV.createNewProfile(saveProfile)
+        }
+    }
+    
+    @IBAction fileprivate func nextButtonDidTouch(){
+        if let digit1 = digit1Field.text,
+           let digit2 = digit2Field.text,
+           let digit3 = digit3Field.text,
+           let digit4 = digit4Field.text {
+            
+            let otpCode : String = "\(digit1)\(digit2)\(digit3)\(digit4)"
+            
+            if let getProfile = profile{
+                otpMV.validateOTP(getProfile.userName, otpCode)
+            }
+            
+        }
+    }
+    
+    fileprivate func presentHomePage(){
+        let tabarVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(identifier: "TAB_BAR_SCREEN") as TabBarViewController
+        
+        tabarVC.modalPresentationStyle = .fullScreen
+        
+        present(tabarVC, animated: true, completion: nil)
+    }
+    
+    fileprivate func setupAnimation(){
+        
+        view.addSubview(animationBlackView)
+        
+        NSLayoutConstraint.activate([
+            animationBlackView.topAnchor.constraint(equalTo: view.topAnchor, constant: 0),
+            animationBlackView.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 0),
+            animationBlackView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0),
+            animationBlackView.rightAnchor.constraint(equalTo: view.rightAnchor, constant: 0)
+        ])
+        
+        let activityIndicatorView = NVActivityIndicatorView(frame: .zero, type: .orbit, color: UIColor(named: "Intraduction_Background"), padding: 0)
+        
+        activityIndicatorView.translatesAutoresizingMaskIntoConstraints = false
+        
+        animationBlackView.addSubview(activityIndicatorView)
+        
+        NSLayoutConstraint.activate([
+            activityIndicatorView.widthAnchor.constraint(equalToConstant: 200),
+            activityIndicatorView.heightAnchor.constraint(equalToConstant: 200),
+            activityIndicatorView.centerXAnchor.constraint(equalTo: animationBlackView.centerXAnchor),
+            activityIndicatorView.centerYAnchor.constraint(equalTo: animationBlackView.centerYAnchor)
+        ])
+        
+        activityIndicatorView.startAnimating()
+        
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 5){
+            activityIndicatorView.stopAnimating()
+            self.presentHomePage()
         }
     }
 }
@@ -489,4 +604,28 @@ extension MobileVerificationViewController : UITextFieldDelegate {
             }
         }
     }
+}
+
+extension MobileVerificationViewController : OTPDelegate {
+    func validateOTPResult(_ result: Bool) {
+        if result {
+            saveProfile()
+        } else {
+            invalidOTPMessage()
+        }
+    }
+}
+
+extension MobileVerificationViewController : RegistrationDelegate{
+    func getResponse(_ response: ApiResponse) {
+        if response.status == "201"{
+            setupAnimation()
+        }
+    }
+    
+    func getUniqueFieldResult(_ field: String, _ result: Bool) {
+        
+    }
+    
+    
 }
