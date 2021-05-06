@@ -54,6 +54,26 @@ extension UITextField {
         self.layer.masksToBounds = true
         
     }
+    
+    func setupRightImage(imageName:String, color:UIColor){
+        let imageView = UIImageView(frame: CGRect(x: -7, y: 0, width: 25, height: 20))
+        imageView.image = UIImage(systemName: imageName)
+        let imageContainerView: UIView = UIView(frame: CGRect(x: 0, y: 0, width: 25, height: 20))
+        imageContainerView.addSubview(imageView)
+        rightView = imageContainerView
+        rightViewMode = .always
+        self.tintColor = color
+    }
+    
+    func setupRightCustomImage(imageName:String, color:UIColor){
+        let imageView = UIImageView(frame: CGRect(x: -7, y: 0, width: 25, height: 20))
+        imageView.image = UIImage(named: imageName)
+        let imageContainerView: UIView = UIView(frame: CGRect(x: 0, y: 0, width: 25, height: 20))
+        imageContainerView.addSubview(imageView)
+        rightView = imageContainerView
+        rightViewMode = .always
+        self.tintColor = color
+    }
 }
 
 extension UIView{
@@ -105,5 +125,14 @@ extension String{
         numberFormatter.numberStyle = .currency
         numberFormatter.locale = Locale(identifier: "si_LK")
         return numberFormatter.string(from: NSNumber(value: amount1!))!
+    }
+}
+
+extension Date {
+    func getFormattedDate() -> Date {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        dateFormatter.timeZone = TimeZone.current
+        return dateFormatter.date(from: dateFormatter.string(from: Date()))!
     }
 }
