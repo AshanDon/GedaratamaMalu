@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Alamofire
 
 class RegisterViewController: UIViewController {
     
@@ -40,6 +41,12 @@ class RegisterViewController: UIViewController {
     private let countryCodeList : [String] = ["+91 India","+92 Pakistan","+94 Sri Lanka","+95 Myanmar","+960 Maldives","+971 United Arab Emirates","+91 India","+92 Pakistan","+94 Sri Lanka","+95 Myanmar","+960 Maldives","+971 United Arab Emirates"]
     
     private var countryCode : String? = nil
+    
+    private var jwt_Token : String = String()
+    
+    private var registerMV : RegisterModelView!
+    
+    private var otpMV : OTPViewModel!
     
     private lazy var touchView : UIView = {
         
@@ -217,6 +224,12 @@ class RegisterViewController: UIViewController {
         
         NotificationCenter.default.addObserver(self, selector: #selector(changeMobileNoFormFV), name: Notification.Name("EDIT_MOBILE_NO"), object: nil)
         
+        getDefaultJWTToken()
+        
+        registerMV = RegisterModelView(jwt_Token)
+        registerMV.delegate = self
+        
+        otpMV = OTPViewModel(jwt_Token)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -330,10 +343,8 @@ class RegisterViewController: UIViewController {
         
         emailField.setLeftPaddingPoints(5)
         
-        emailField.setRightPaddingPoints(5)
-        
-        //Password Field
-        passwordField.attributedPlaceholder = NSAttributedString(string: "Password", attributes: [
+        //User Name Field
+        userNameField.attributedPlaceholder = NSAttributedString(string: "User Name", attributes: [
             
             NSAttributedString.Key.font : UIFont.systemFont(ofSize: 16)
             
@@ -348,7 +359,7 @@ class RegisterViewController: UIViewController {
         userNameField.setRightPaddingPoints(5)
         
         //Password Field
-        userNameField.attributedPlaceholder = NSAttributedString(string: "User Name", attributes: [
+        passwordField.attributedPlaceholder = NSAttributedString(string: "Password", attributes: [
             
             NSAttributedString.Key.font : UIFont.systemFont(ofSize: 16)
             
@@ -399,51 +410,48 @@ class RegisterViewController: UIViewController {
     @IBAction private func registerButtonPressed(){
         
         if firstNameField.text!.isEmpty {
-            showAlertMessage("Enter your first name")
+            firstNameField.setupRightCustomImage(imageName: "Empty_Icon", color: .red)
         } else if lastNameField.text!.isEmpty {
-            showAlertMessage("Enter your last name")
+            lastNameField.setupRightCustomImage(imageName: "Empty_Icon", color: .red)
         } else if countryCodeField.text!.isEmpty || contactField.text!.isEmpty{
-            showAlertMessage("Enter your valid mobile number")
+            contactField.setupRightCustomImage(imageName: "Empty_Icon", color: .red)
         } else if emailField.text!.isEmpty {
-            showAlertMessage("Enter your valid email address")
+            emailField.setupRightCustomImage(imageName: "Empty_Icon", color: .red)
         } else if userNameField.text!.isEmpty {
-            showAlertMessage("Enter your user name")
+            userNameField.setupRightCustomImage(imageName: "Empty_Icon", color: .red)
         } else if passwordField.text!.isEmpty {
-            showAlertMessage("Enter your password")
+            passwordField.setupRightCustomImage(imageName: "Empty_Icon", color: .red)
         } else if rePasswordField.text!.isEmpty {
-            showAlertMessage("Enter your rePassword")
+            rePasswordField.setupRightCustomImage(imageName: "Empty_Icon", color: .red)
         } else if !passwordField.text!.elementsEqual(rePasswordField.text!){
-            showAlertMessage("The password does not match. Please try again.")
+            presentPopOver("The password does not match. Please try again.", rePasswordField)
         } else {
-
-            let verificationVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(identifier: "MOBILE_VERIFIY_SCREEN") as MobileVerificationViewController
-
-            verificationVC.modalPresentationStyle = .fullScreen
-
-            verificationVC.modalTransitionStyle = .crossDissolve
             
-            let mobileNo = "\(countryCodeField.text!)\(contactField.text!)"
-            verificationVC.mobileNumber = mobileNo
-
-            self.present(verificationVC, animated: true, completion: nil)
+            if let firstName = firstNameField.text,
+               let lastName = lastNameField.text,
+               let mobile = contactField.text,
+               let email = emailField.text,
+               let userName = userNameField.text,
+               let password = passwordField.text {
+                
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "yyyy-MM-dd"
+                let date = dateFormatter.date(from:"2021-04-05")
+                
+                let profileType = ProfileType(id: 5, type: "Administrator", status: true, date: date!)
+                
+                guard let code = countryCodeField.text else { return }
+                var mobileCode : String {
+                    return "\(code) \(mobile)"
+                }
+                print(mobileCode)
+                let profile = Profile(first_Name: firstName, last_Name: lastName, mobile: mobileCode, email: email, userName: userName, password: password, status: true, date: Date().getFormattedDate(), profileType: profileType)
+                
+                presentVerificationVC(profile)
+                otpMV.generateOTP(userName)
+            }
 
         }
-        
-    }
-    
-    private func showAlertMessage(_ message : String) {
-        
-        let alert = UIAlertController(title: "Alert", message: message, preferredStyle: .alert)
-        
-        let okAction = UIAlertAction(title: "Ok", style: .default) { (action) in
-            
-            alert.dismiss(animated: true, completion: nil)
-            
-        }
-        
-        alert.addAction(okAction)
-        
-        self.present(alert, animated: true, completion: nil)
         
     }
     
@@ -572,6 +580,98 @@ class RegisterViewController: UIViewController {
     @objc private func changeMobileNoFormFV(){
         showCountryCodePicker()
     }
+    
+    fileprivate func getDefaultJWTToken() {
+        let userDefault = UserDefaults.standard
+        self.jwt_Token = userDefault.object(forKey: "JWT_TOKEN") as! String
+    }
+    
+    
+    fileprivate func presentVerificationVC(_ profile : Profile){
+        
+        let verificationVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(identifier: "MOBILE_VERIFIY_SCREEN") as MobileVerificationViewController
+        
+        verificationVC.modalPresentationStyle = .fullScreen
+        
+        verificationVC.modalTransitionStyle = .crossDissolve
+        
+        verificationVC.profile = profile
+        
+        self.present(verificationVC, animated: true, completion: nil)
+    }
+    
+    @IBAction func checkValiedEmail() {
+        //emailField.setupRightImage(imageName: "envelope.fill", color:.red)
+        if let emailAddress = emailField.text {
+            
+            if isValidEmail(emailAddress) {
+                registerMV.checkEmail(emailAddress)
+            } else {
+                emailField.setupRightImage(imageName: "envelope.fill", color: UIColor.red)
+                presentPopOver("Enter valid Email Address", emailField)
+            }
+            
+        }
+    }
+    
+    @IBAction func checkUserNameAvailability() {
+        if let userName = userNameField.text {
+            registerMV.checkUserName(userName)
+        }
+    }
+    
+    @IBAction func checkPassword(_ sender: UITextField) {
+        
+        if let password = sender.text,4 < password.count && 8 > password.count {
+            passwordField.setupRightImage(imageName: "key.fill", color: .orange)
+        } else if isValidPassword(testStr: sender.text) {
+            passwordField.setupRightImage(imageName: "checkmark", color: .green)
+        } else {
+            passwordField.setupRightImage(imageName: "key.fill", color: .red)
+        }
+    }
+    
+    @IBAction func textEditDidBegining(_ sender: UITextField) {
+        sender.rightView = nil
+        sender.clearsOnBeginEditing = true
+        sender.setTintColor(.darkGray)
+    }
+    
+    @IBAction func repasswordDidEnd(_ sender: UITextField) {
+        guard let password = passwordField.text else { return }
+        
+        if let rePassword = rePasswordField.text, rePassword.count > 0 && !password.elementsEqual(rePassword){
+            rePasswordField.setupRightImage(imageName: "exclamationmark.triangle.fill", color: .red)
+        }
+    }
+    
+    fileprivate func isValidPassword(testStr:String?) -> Bool {
+        guard testStr != nil else { return false }
+        let passwordTest = NSPredicate(format: "SELF MATCHES %@", "(?=.*[A-Z])(?=.*[0-9])(?=.*[a-z]).{8,}")
+        return passwordTest.evaluate(with: testStr)
+    }
+    
+    fileprivate func isValidEmail(_ email: String) -> Bool {
+        let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
+
+        let emailPred = NSPredicate(format:"SELF MATCHES %@", emailRegEx)
+        return emailPred.evaluate(with: email)
+    }
+    
+    fileprivate func presentPopOver(_ message : String,_ field : UITextField){
+        let controller = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "POP_VIEW") as! AlertPopOverViewController
+        controller.getMessage = message
+        controller.modalPresentationStyle = .popover
+        controller.preferredContentSize = CGSize(width: 250 , height: 50)
+        
+        let popover = controller.popoverPresentationController
+        popover?.delegate = self
+        popover?.permittedArrowDirections = .down
+        popover?.sourceView = field
+        popover?.sourceRect = field.bounds
+        popover?.backgroundColor = UIColor.lightGray
+        self.present(controller, animated: true, completion: nil)
+    }
 }
 
 extension RegisterViewController : UIPickerViewDataSource {
@@ -607,20 +707,42 @@ extension RegisterViewController : UITextFieldDelegate {
         textField.endEditing(true)
         return true
     }
-    
-    func textFieldDidEndEditing(_ textField: UITextField) {
-        if textField.attributedPlaceholder!.string.elementsEqual("First Name"){
-            lastNameField.becomeFirstResponder()
-        } else if textField.attributedPlaceholder!.string.elementsEqual("Last Name") {
-            showCountryCodePicker()
-        } else if textField.attributedPlaceholder!.string.elementsEqual("Mobile No"){
-            emailField.becomeFirstResponder()
-        } else if textField.attributedPlaceholder!.string.elementsEqual("Email"){
-            userNameField.becomeFirstResponder()
-        } else if textField.attributedPlaceholder!.string.elementsEqual("User Name"){
-            passwordField.becomeFirstResponder()
-        } else if textField.attributedPlaceholder!.string.elementsEqual("Password"){
-            rePasswordField.becomeFirstResponder()
+}
+
+extension RegisterViewController : RegistrationDelegate {
+    func getUniqueFieldResult(_ field: String, _ result: Bool) {
+        switch field {
+        case "email":
+            if result == false{
+                self.emailField.setupRightImage(imageName: "envelope.fill", color: UIColor.red)
+                self.presentPopOver("Email already exists.", emailField)
+            } else {
+                self.emailField.rightView = nil
+            }
+            break
+            
+        case "user_name":
+            if result == false{
+                self.userNameField.setupRightImage(imageName: "person.fill", color: UIColor.red)
+                self.presentPopOver("UserName already exists.", userNameField)
+            } else {
+                self.emailField.rightView = nil
+            }
+            break
+            
+        default:
+            break
         }
+    }
+    
+    
+    func getResponse(_ response: ApiResponse) {
+        
+    }
+}
+
+extension RegisterViewController : UIPopoverPresentationControllerDelegate{
+    func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {
+        return .none
     }
 }
