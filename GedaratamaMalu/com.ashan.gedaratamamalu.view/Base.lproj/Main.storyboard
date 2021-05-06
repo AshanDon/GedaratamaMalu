@@ -1369,6 +1369,9 @@
                                                                                 <rect key="frame" x="0.0" y="0.0" width="160" height="44"/>
                                                                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                                                 <textInputTraits key="textInputTraits" returnKeyType="continue" enablesReturnKeyAutomatically="YES" textContentType="honorifix-prefix"/>
+                                                                                <connections>
+                                                                                    <action selector="textEditDidBegining:" destination="wXM-mh-AV3" eventType="editingDidBegin" id="2kN-Lv-cZf"/>
+                                                                                </connections>
                                                                             </textField>
                                                                         </subviews>
                                                                         <constraints>
@@ -1385,6 +1388,9 @@
                                                                                 <rect key="frame" x="0.0" y="0.0" width="160" height="44"/>
                                                                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                                                 <textInputTraits key="textInputTraits" returnKeyType="continue" enablesReturnKeyAutomatically="YES" textContentType="honorifix-prefix"/>
+                                                                                <connections>
+                                                                                    <action selector="textEditDidBegining:" destination="wXM-mh-AV3" eventType="editingDidBegin" id="pmf-zF-0RZ"/>
+                                                                                </connections>
                                                                             </textField>
                                                                         </subviews>
                                                                         <constraints>
@@ -1411,6 +1417,9 @@
                                                                 <rect key="frame" x="70" y="0.0" width="265" height="44"/>
                                                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                                 <textInputTraits key="textInputTraits" keyboardType="numberPad" returnKeyType="continue" enablesReturnKeyAutomatically="YES" textContentType="tel"/>
+                                                                <connections>
+                                                                    <action selector="textEditDidBegining:" destination="wXM-mh-AV3" eventType="editingDidBegin" id="BAL-AA-hDt"/>
+                                                                </connections>
                                                             </textField>
                                                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="ZUj-jm-Fqu">
                                                                 <rect key="frame" x="0.0" y="0.0" width="65" height="44"/>
@@ -1438,6 +1447,10 @@
                                                                 <rect key="frame" x="0.0" y="0.0" width="335" height="44"/>
                                                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                                 <textInputTraits key="textInputTraits" keyboardType="emailAddress" returnKeyType="continue" enablesReturnKeyAutomatically="YES" textContentType="email"/>
+                                                                <connections>
+                                                                    <action selector="checkValiedEmail" destination="wXM-mh-AV3" eventType="editingDidEnd" id="gcv-d3-FRy"/>
+                                                                    <action selector="textEditDidBegining:" destination="wXM-mh-AV3" eventType="editingDidBegin" id="j3G-iQ-pfK"/>
+                                                                </connections>
                                                             </textField>
                                                         </subviews>
                                                         <constraints>
@@ -1454,6 +1467,10 @@
                                                                 <rect key="frame" x="0.0" y="0.0" width="335" height="44"/>
                                                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                                 <textInputTraits key="textInputTraits" returnKeyType="continue" enablesReturnKeyAutomatically="YES" textContentType="username"/>
+                                                                <connections>
+                                                                    <action selector="checkUserNameAvailability" destination="wXM-mh-AV3" eventType="editingDidEnd" id="mIn-f3-x5M"/>
+                                                                    <action selector="textEditDidBegining:" destination="wXM-mh-AV3" eventType="editingDidBegin" id="ca5-Qt-0WM"/>
+                                                                </connections>
                                                             </textField>
                                                         </subviews>
                                                         <constraints>
@@ -1470,6 +1487,10 @@
                                                                 <rect key="frame" x="0.0" y="0.0" width="335" height="44"/>
                                                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                                 <textInputTraits key="textInputTraits" returnKeyType="continue" enablesReturnKeyAutomatically="YES" secureTextEntry="YES" textContentType="password"/>
+                                                                <connections>
+                                                                    <action selector="checkPassword:" destination="wXM-mh-AV3" eventType="editingChanged" id="aJc-mI-fKB"/>
+                                                                    <action selector="textEditDidBegining:" destination="wXM-mh-AV3" eventType="editingDidBegin" id="FLg-bO-UNU"/>
+                                                                </connections>
                                                             </textField>
                                                         </subviews>
                                                         <constraints>
@@ -1486,6 +1507,10 @@
                                                                 <rect key="frame" x="0.0" y="0.0" width="335" height="44"/>
                                                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                                 <textInputTraits key="textInputTraits" returnKeyType="continue" enablesReturnKeyAutomatically="YES" secureTextEntry="YES" textContentType="new-password"/>
+                                                                <connections>
+                                                                    <action selector="repasswordDidEnd:" destination="wXM-mh-AV3" eventType="editingDidEnd" id="uZa-vJ-FCT"/>
+                                                                    <action selector="textEditDidBegining:" destination="wXM-mh-AV3" eventType="editingDidBegin" id="vSC-kT-L4M"/>
+                                                                </connections>
                                                             </textField>
                                                         </subviews>
                                                         <constraints>
@@ -1498,10 +1523,9 @@
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="i4c-qa-aoN" userLabel="Register Row 7">
                                                         <rect key="frame" x="0.0" y="354" width="335" height="44"/>
                                                         <subviews>
-                                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="mJq-hB-2L5">
+                                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="mJq-hB-2L5">
                                                                 <rect key="frame" x="0.0" y="0.0" width="335" height="44"/>
                                                                 <color key="backgroundColor" name="Button_Background_Color"/>
-                                                                <fontDescription key="fontDescription" type="boldSystem" pointSize="17"/>
                                                                 <state key="normal" title="Register">
                                                                     <color key="titleColor" name="Black_Color"/>
                                                                 </state>
@@ -1678,6 +1702,9 @@
                                 <state key="normal" title="Next">
                                     <color key="titleColor" name="Black_Color"/>
                                 </state>
+                                <connections>
+                                    <action selector="nextButtonDidTouch" destination="dDi-qP-SO3" eventType="touchUpInside" id="NGW-bD-lJj"/>
+                                </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Resend Code via" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lKO-2D-xqJ">
                                 <rect key="frame" x="131" y="280" width="113" height="17"/>
@@ -1768,6 +1795,44 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="5Iv-hp-3FT" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="3494" y="116"/>
+        </scene>
+        <!--Alert Pop Over View Controller-->
+        <scene sceneID="ZSc-R5-OFX">
+            <objects>
+                <viewController storyboardIdentifier="POP_VIEW" id="Bq4-Rj-ukp" customClass="AlertPopOverViewController" customModule="GedaratamaMalu" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="UuJ-cb-Fk5">
+                        <rect key="frame" x="0.0" y="0.0" width="200" height="50"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="TEXT" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="eJY-OS-JP5">
+                                <rect key="frame" x="0.0" y="0.0" width="200" height="50"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="200" id="XC1-kF-qaT"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="lKg-AK-6qE"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="eJY-OS-JP5" firstAttribute="top" secondItem="lKg-AK-6qE" secondAttribute="top" id="DJU-nh-XT6"/>
+                            <constraint firstItem="eJY-OS-JP5" firstAttribute="leading" secondItem="lKg-AK-6qE" secondAttribute="leading" id="j0S-86-Z5t"/>
+                            <constraint firstItem="lKg-AK-6qE" firstAttribute="trailing" secondItem="eJY-OS-JP5" secondAttribute="trailing" id="wHy-vu-bm8"/>
+                            <constraint firstItem="lKg-AK-6qE" firstAttribute="bottom" secondItem="eJY-OS-JP5" secondAttribute="bottom" id="ztQ-9Z-YP2"/>
+                        </constraints>
+                    </view>
+                    <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+                    <size key="freeformSize" width="200" height="50"/>
+                    <connections>
+                        <outlet property="backgroundView" destination="UuJ-cb-Fk5" id="594-QV-8kP"/>
+                        <outlet property="messageLabel" destination="eJY-OS-JP5" id="IUG-1L-tbt"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="hZa-bg-hfH" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="4221" y="-154"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="nqD-Lv-9Xq">
