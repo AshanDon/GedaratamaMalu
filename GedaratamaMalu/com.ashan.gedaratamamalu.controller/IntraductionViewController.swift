@@ -50,8 +50,6 @@ class IntraductionViewController: UIViewController {
         swipingView.dataSource = self
         
         swipingView.delegate = self
-        
-        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -60,8 +58,14 @@ class IntraductionViewController: UIViewController {
         
         setupPageController()
         
-        
         super.viewWillAppear(animated)
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        let userDefault = UserDefaults.standard
+        print(userDefault.object(forKey: "JWT_TOKEN") as! String)
     }
     
     override func viewDidLayoutSubviews() {
