@@ -8,9 +8,11 @@
 import Foundation
 
 struct JwtToken : Decodable {
-    let jwt : String 
+    let jwt : String
+    let password : String
     
-    init(jwt : String) {
+    init(jwt : String,password : String) {
         self.jwt = jwt
+        self.password = password
     }
 }
