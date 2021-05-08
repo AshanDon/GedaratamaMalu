@@ -13,7 +13,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     let authModelView = AuthenticationViewModel()
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        authModelView.delegate = self
+        authModelView.authDelegate = self
         authModelView.getDefaultJwtWebToken()
         return true
     }
@@ -36,7 +36,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 extension AppDelegate : AuthenticationDelegate{
     
     func getJwtToken(token: String) {
-        print("delegate \(token)")
         let userDefault = UserDefaults.standard
         userDefault.set(token, forKey: "JWT_TOKEN")
     }
