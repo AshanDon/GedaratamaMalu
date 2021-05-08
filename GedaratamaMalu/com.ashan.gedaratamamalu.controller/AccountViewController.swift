@@ -57,6 +57,9 @@ class AccountViewController: UIViewController {
         if let window = UIApplication.shared.windows.first{
             window.rootViewController = signInVC
             window.makeKeyAndVisible()
+            
+            let userDefault = UserDefaults.standard
+            userDefault.set(false, forKey: "IS_LOGGING")
         }
         
     }
