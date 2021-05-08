@@ -514,7 +514,9 @@ class MobileVerificationViewController: UIViewController {
         
         tabarVC.modalPresentationStyle = .fullScreen
         
-        present(tabarVC, animated: true, completion: nil)
+        present(tabarVC, animated: true) {
+            self.updateUserDefault()
+        }
     }
     
     fileprivate func setupAnimation(){
@@ -547,6 +549,11 @@ class MobileVerificationViewController: UIViewController {
             activityIndicatorView.stopAnimating()
             self.presentHomePage()
         }
+    }
+    
+    fileprivate func updateUserDefault(){
+        let userDefault = UserDefaults.standard
+        userDefault.set(true, forKey: "IS_LOGGING")
     }
 }
 
