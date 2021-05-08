@@ -12,8 +12,8 @@ import UIKit
 class PresentController {
     
     public func isLogedIn() -> Bool {
-        
-        return false
+        let userDefault = UserDefaults.standard
+        return userDefault.bool(forKey: "IS_LOGGING") 
         
     }
     
