@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import NVActivityIndicatorView
 
 class SignInViewController: UIViewController {
 
@@ -22,7 +23,10 @@ class SignInViewController: UIViewController {
     @IBOutlet weak var scrollView : UIScrollView!
     
     private var moveLogoAnimator : UIViewPropertyAnimator!
+    
     private var logoIVBottomConstraint : NSLayoutConstraint!
+    
+    fileprivate var authViewMode : AuthenticationViewModel!
     
     private lazy var logoImageView : UIImageView = {
        
@@ -49,6 +53,14 @@ class SignInViewController: UIViewController {
         tv.addGestureRecognizer(viewTGR)
         
         return tv
+    }()
+    
+    private lazy var animationBlackView : UIView = {
+       let bView = UIView()
+        bView.isUserInteractionEnabled = true
+        bView.frame = view.bounds
+        bView.backgroundColor = UIColor(white: 0, alpha: 0.7)
+        return bView
     }()
     
     override func viewDidLoad() {
@@ -80,7 +92,9 @@ class SignInViewController: UIViewController {
         userNameField.delegate = self
         
         passwordField.delegate = self
-
+        
+        authViewMode = AuthenticationViewModel()
+        authViewMode.authDelegate = self
     }
     
     override func viewDidLayoutSubviews() {
@@ -249,7 +263,9 @@ class SignInViewController: UIViewController {
             presentedAlert("User Name or password is Empty")
             
         } else {
-            presentTabBarVC()
+            if let userName = userNameField.text, let password = passwordField.text {
+                authViewMode.getUserProfile(userName, password)
+            }
         }
     }
     
@@ -321,6 +337,43 @@ class SignInViewController: UIViewController {
         if let window = UIApplication.shared.windows.first {
             window.rootViewController = tabBarVC
             window.makeKeyAndVisible()
+            
+            let userDefault = UserDefaults.standard
+            userDefault.set(true, forKey: "IS_LOGGING")
+        }
+    }
+    
+    fileprivate func presentAnimationView(){
+        
+        view.addSubview(animationBlackView)
+        
+        NSLayoutConstraint.activate([
+            animationBlackView.topAnchor.constraint(equalTo: view.topAnchor, constant: 0),
+            animationBlackView.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 0),
+            animationBlackView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0),
+            animationBlackView.rightAnchor.constraint(equalTo: view.rightAnchor, constant: 0)
+        ])
+        
+        //setup animation
+        
+        let activityIndicatorView = NVActivityIndicatorView(frame: .zero, type: .orbit, color: UIColor(named: "Intraduction_Background"), padding: 0)
+        
+        animationBlackView.addSubview(activityIndicatorView)
+        
+        activityIndicatorView.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            activityIndicatorView.widthAnchor.constraint(equalToConstant: 200.0),
+            activityIndicatorView.heightAnchor.constraint(equalToConstant: 200.0),
+            activityIndicatorView.centerXAnchor.constraint(equalTo: animationBlackView.centerXAnchor),
+            activityIndicatorView.centerYAnchor.constraint(equalTo: animationBlackView.centerYAnchor)
+        ])
+        
+        activityIndicatorView.startAnimating()
+        
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 5){
+            activityIndicatorView.stopAnimating()
+            self.presentTabBarVC()
         }
     }
 }
@@ -332,5 +385,29 @@ extension SignInViewController : UITextFieldDelegate {
         textField.endEditing(true)
         
         return true
+    }
+}
+
+extension SignInViewController : AuthenticationDelegate {
+    func getJwtToken(token: String) {
+        let userDefault = UserDefaults.standard
+        userDefault.set(token, forKey: "JWT_TOKEN")
+        presentAnimationView()
+    }
+    
+    func getSignInError(_ message : String) {
+        
+        let alertController = UIAlertController(title: "Warning", message: message, preferredStyle: .alert)
+        
+        let alertAction = UIAlertAction(title: "Ok", style: .default) { (action) in
+            self.userNameField.text = nil
+            self.userNameField.becomeFirstResponder()
+            self.passwordField.text = nil
+        }
+        
+        alertController.addAction(alertAction)
+        
+        self.present(alertController, animated: true, completion: nil)
+        
     }
 }
