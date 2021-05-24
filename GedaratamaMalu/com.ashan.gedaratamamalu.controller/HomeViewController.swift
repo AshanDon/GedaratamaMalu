@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import NVActivityIndicatorView
 
 class HomeViewController: UIViewController {
 
@@ -23,12 +24,17 @@ class HomeViewController: UIViewController {
     @IBOutlet weak var notifiViewTopConstraint: NSLayoutConstraint!
     
     fileprivate var productList : [Product] = [Product]()
-    fileprivate var cartList : [Product] = [Product]()
+    fileprivate var cartList : [Int:Product] = [Int:Product]()
     
-    private var notifiMoveUpAnimation : UIViewPropertyAnimator!
-    private var dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("TemparyCartList.plist")
+    fileprivate var notifiMoveUpAnimation : UIViewPropertyAnimator!
+    fileprivate var dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("TemparyCartList.plist")
     
-    private lazy var touchView : UIView = {
+    fileprivate var productVM : ProductViewModel!
+    fileprivate var refreshController : UIRefreshControl!
+    fileprivate var activityIndicatorView : NVActivityIndicatorView!
+    
+    
+    fileprivate lazy var touchView : UIView = {
        
         let tView = UIView()
         
@@ -39,6 +45,53 @@ class HomeViewController: UIViewController {
         
         return tView
         
+    }()
+    
+    fileprivate lazy var backgroundBlackView : UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor(white: 0, alpha: 0.5)
+        return view
+    }()
+    
+    fileprivate lazy var errorAletView : UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor(named: "White_Color")
+        view.layer.cornerRadius = CGFloat(20)
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    fileprivate lazy var errorImageView : UIImageView = {
+        let imageView = UIImageView()
+        imageView.image = UIImage(named: "Warning_Icon")
+        imageView.contentMode = .scaleAspectFit
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        return imageView
+    }()
+    
+    fileprivate lazy var errorMessageLabel : UILabel = {
+        let label = UILabel()
+        label.textAlignment = .center
+        label.textColor = UIColor(named: "Black_Color")
+        label.numberOfLines = 0
+        label.attributedText = NSAttributedString(string: "Product not found!", attributes: [
+                                                    NSAttributedString.Key.font : UIFont.boldSystemFont(ofSize: 24)])
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    fileprivate lazy var errorButton : UIButton = {
+        let button = UIButton()
+        button.titleLabel?.textAlignment = .center
+        button.setTitle("Try again", for: .normal)
+        button.titleLabel?.attributedText = NSAttributedString(string: "Try again", attributes: [
+                                                                NSAttributedString.Key.font : UIFont.boldSystemFont(ofSize: 21)])
+        button.titleLabel?.tintColor = UIColor(named: "White_Color")
+        button.backgroundColor = UIColor(named: "Intraduction_Background")
+        button.layer.cornerRadius = 18
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(errorButtonDidPressed), for: .touchUpInside)
+        return button
     }()
     
     override func viewDidLoad() {
@@ -52,13 +105,21 @@ class HomeViewController: UIViewController {
         
         productView.dataSource = self
         
+        let jwt_Key = UserDefaults.standard.object(forKey: "JWT_TOKEN") as! String
+        
+        productVM = ProductViewModel(jwt_Key)
+        productVM.delegate = self
+        
         loadProductList()
         
         productSearchField.delegate = self
         
+        NotificationCenter.default.addObserver(self, selector: #selector(writeTemporyCartList), name: UIApplication.willResignActiveNotification, object: nil)
+        
+        setupRefreshController()
     }
     
-    func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+    internal func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
 
         let y = targetContentOffset.pointee.y
 
@@ -83,21 +144,11 @@ class HomeViewController: UIViewController {
         super.viewWillDisappear(animated)
         
         disappearFromKeyboardEvent()
-        
-        let encoder = PropertyListEncoder()
-        
-        do {
-            let data = try encoder.encode(cartList)
-            try data.write(to: dataFilePath!)
-            
-            
-        } catch {
-            print("Error encoding cart list \(error)")
-        }
+        writeTemporyCartList()
         setDataCartVC()
     }
     
-    private func modifiyViewComponent(){
+    fileprivate func modifiyViewComponent(){
         
         view.layer.opacity = Float(72)
         
@@ -130,23 +181,8 @@ class HomeViewController: UIViewController {
         notifiBackgroundView.layer.borderWidth = 1
     }
 
-    private func loadProductList(){
-        
-        let product_1 = Product(productId: 1, productImage: "Fish 1", catogaryName: "Fish", productName: "Alagoduwa (අලගොඩුවා)",description: "Imported", productPrice: 600.00, productQty: 1)
-        
-        let product_2 = Product(productId: 2, productImage: "Fish 2", catogaryName: "Fish", productName: "Balaya (බල මාළු)",description: "Local", productPrice: 650.00, productQty: 1)
-        
-        let product_3 = Product(productId: 3, productImage: "Fish 3", catogaryName: "Seafood", productName: "Crabs(කකුළුව)",description: "Imported", productPrice: 1100.00, productQty: 1)
-        
-        let product_4 = Product(productId: 4, productImage: "Fish 4", catogaryName: "Seafood", productName: "Cuttle fish (Clean)",description: "Local", productPrice: 1100.00, productQty: 1)
-        
-        let product_5 = Product(productId: 5, productImage: "Fish 5", catogaryName: "Fish", productName: "Galmalu (ගල්මාළු)",description: "Imported", productPrice: 1000.00, productQty: 1)
-        
-        productList.append(product_1)
-        productList.append(product_2)
-        productList.append(product_3)
-        productList.append(product_4)
-        productList.append(product_5)
+    fileprivate func loadProductList(){
+        productVM.getAllProductDetails()
     }
     
     
@@ -210,16 +246,16 @@ class HomeViewController: UIViewController {
     
     @objc private func addToCartButtonDidPressed(sender : UIButton){
         
-        let product = self.productList[sender.tag] as Product
-        addedItemToCart(product)
+        let requestProduct = self.productList[sender.tag] as Product
         
+        addedItemToCart(requestProduct)
+       
     }
     
-    private func moveDownNotification(){
+    fileprivate func moveDownNotification(){
         
         UIView.animate(withDuration: 1.5, delay: 0.5, options: .curveEaseInOut) { [weak self] in
             guard let strongeSelf = self else { return }
-            print("moving down")
             strongeSelf.notifiViewTopConstraint.constant = 15.0
             strongeSelf.view.layoutIfNeeded()
         } completion: { (success) in
@@ -231,25 +267,26 @@ class HomeViewController: UIViewController {
         
     }
     
-    private func moveUpNotification(){
+    fileprivate func moveUpNotification(){
         
         notifiMoveUpAnimation = UIViewPropertyAnimator(duration: 1.5, curve: .easeInOut, animations: { [weak self] in
             guard let strongeSelf = self else { return }
             strongeSelf.notifiViewTopConstraint.constant = -30.0
             strongeSelf.view.layoutIfNeeded()
-            print("moving up")
-            
         })
 
     }
     
-    private func getPenddingCartItem(){
+    fileprivate func getPenddingCartItem(){
         
         if let data = try? Data(contentsOf: dataFilePath!){
             let decode = PropertyListDecoder()
             
             do {
-                cartList = try decode.decode([Product].self, from: data)
+                let getCartList = try decode.decode([Product].self, from: data)
+                for cartItem in getCartList {
+                    cartList[cartItem.id!] = cartItem
+                }
                 cartProductCount.text = "\(cartList.count)"
             } catch {
                 print("Error decoding cart list \(error)")
@@ -257,11 +294,122 @@ class HomeViewController: UIViewController {
         }
     }
     
-    private func setDataCartVC(){
+    fileprivate func setDataCartVC(){
         guard let viewControllers = tabBarController?.viewControllers else { return }
         guard let cartVC = viewControllers[1] as? CartViewController else { return }
-        cartVC.setCartList = cartList
+        
+        var cartData = [Product]()
+        
+        for cartItem in cartList {
+            cartData.append(cartItem.value)
+        }
+        
+        cartVC.setCartList = cartData
         cartVC.delegate = self
+    }
+    
+    @objc fileprivate func writeTemporyCartList(){
+        let encoder = PropertyListEncoder()
+
+        do {
+            var temporyList = [Product]()
+            for cartProduct in cartList {
+                temporyList.append(cartProduct.value)
+            }
+            let data = try encoder.encode(temporyList)
+            try data.write(to: dataFilePath!)
+
+
+        } catch {
+            print("Error encoding cart list \(error)")
+        }
+    }
+    
+    fileprivate func setupRefreshController(){
+    
+        refreshController = UIRefreshControl(frame: CGRect(x: 0, y: 0, width: productView.frame.width, height: 50));
+        refreshController.tintColor = .clear
+        refreshController.backgroundColor = .clear
+        refreshController.addTarget(self, action: #selector(refreshContent), for: .valueChanged)
+        
+        activityIndicatorView = NVActivityIndicatorView(frame: .zero, type: .lineScaleParty, color: UIColor(named: "Button_Background_Color"), padding: 0)
+        
+        activityIndicatorView.translatesAutoresizingMaskIntoConstraints = false
+        
+        refreshController.addSubview(activityIndicatorView)
+        
+        NSLayoutConstraint.activate([
+            activityIndicatorView.widthAnchor.constraint(equalToConstant: 100),
+            activityIndicatorView.heightAnchor.constraint(equalToConstant: 50),
+            activityIndicatorView.centerXAnchor.constraint(equalTo: refreshController.centerXAnchor),
+            activityIndicatorView.centerYAnchor.constraint(equalTo: refreshController.centerYAnchor)
+        ])
+        
+        productView.refreshControl = refreshController
+    }
+    
+    @objc fileprivate func refreshContent(){
+        activityIndicatorView.startAnimating()
+        self.perform(#selector(finishdRefreshing), with: nil, afterDelay: 3.0)
+        loadProductList()
+    }
+    
+    @objc fileprivate func finishdRefreshing(){
+        refreshController.endRefreshing()
+        activityIndicatorView.stopAnimating()
+    }
+    
+    fileprivate func setupBlackView(warningImage : UIImage,messageTitle : String){
+        
+        guard let window = UIApplication.shared.windows.filter({$0.isKeyWindow}).first else { return }
+        
+        backgroundBlackView.frame = window.frame
+        
+        window.addSubview(backgroundBlackView)
+        
+        errorImageView.image = warningImage
+        errorMessageLabel.text = messageTitle
+        
+        backgroundBlackView.addSubview(errorAletView)
+        errorAletView.addSubview(errorImageView)
+        errorAletView.addSubview(errorMessageLabel)
+        errorAletView.addSubview(errorButton)
+        
+        setupLayoutConstraint()
+    }
+    
+    fileprivate func setupLayoutConstraint(){
+        NSLayoutConstraint.activate([
+            //errorAletView layout constraint
+            errorAletView.widthAnchor.constraint(equalToConstant: 260),
+            errorAletView.heightAnchor.constraint(equalToConstant: 283),
+            errorAletView.centerXAnchor.constraint(equalTo: backgroundBlackView.centerXAnchor),
+            errorAletView.centerYAnchor.constraint(equalTo: backgroundBlackView.centerYAnchor),
+            
+            //errorImageView layout constraint
+            errorImageView.widthAnchor.constraint(equalToConstant: 200),
+            errorImageView.heightAnchor.constraint(equalToConstant: 163),
+            errorImageView.topAnchor.constraint(equalTo: errorAletView.topAnchor, constant: 20),
+            errorImageView.centerXAnchor.constraint(equalTo: errorAletView.centerXAnchor),
+            
+            //errorMessageLabel layout constraint
+            errorMessageLabel.heightAnchor.constraint(greaterThanOrEqualToConstant: 33),
+            errorMessageLabel.widthAnchor.constraint(equalToConstant: 236),
+            errorMessageLabel.topAnchor.constraint(equalTo: errorImageView.bottomAnchor, constant: 5),
+            errorMessageLabel.centerXAnchor.constraint(equalTo: errorAletView.centerXAnchor),
+            
+            //errorButton layout constraint
+            errorButton.widthAnchor.constraint(equalToConstant: 192),
+            errorButton.heightAnchor.constraint(equalToConstant: 36),
+            errorButton.topAnchor.constraint(equalTo: errorMessageLabel.bottomAnchor, constant: 13),
+            errorButton.bottomAnchor.constraint(lessThanOrEqualTo: errorAletView.bottomAnchor, constant: 13),
+            errorButton.centerXAnchor.constraint(equalTo: errorAletView.centerXAnchor)
+        ])
+    }
+    
+    @objc fileprivate func errorButtonDidPressed(){
+        backgroundBlackView.removeFromSuperview()
+        productSearchField.text = ""
     }
 }
 
@@ -274,7 +422,6 @@ extension HomeViewController : UICollectionViewDelegate,UICollectionViewDataSour
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
         let productCell = productView.dequeueReusableCell(withReuseIdentifier: "PRODUCT_CELL", for: indexPath) as! ProductViewCell
-        
         productCell.product = productList[indexPath.row] as Product
         productCell.addCartButton.tag = indexPath.row
         productCell.addCartButton.addTarget(self, action: #selector(addToCartButtonDidPressed), for: .touchUpInside)
@@ -310,23 +457,71 @@ extension HomeViewController : UICollectionViewDelegateFlowLayout {
 extension HomeViewController : UISearchBarDelegate{
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar){
-        searchBar.endEditing(true)
+        if let name = searchBar.text {
+            self.view.endEditing(true)
+            productVM.productAdvanceSearch(name)
+        }
     }
+    
+    func searchBarShouldBeginEditing(_ searchBar: UISearchBar) -> Bool {
+        searchBar.clearsContextBeforeDrawing = true
+        productVM.getAllProductDetails()
+        return true
+    }
+    
 }
 
 extension HomeViewController : CartDelegete {
     
     func addedItemToCart(_ item: Product) {
-        self.cartList.append(item)
-        moveDownNotification()
-        self.cartProductCount.text = "\(Int(cartList.count))"
+        if cartList.count == 0 {
+            self.cartList = [item.id!:item]
+            moveDownNotification()
+            self.cartProductCount.text = "\(Int(cartList.count))"
+        } else {
+            
+            let _ = cartList.filter { (result) -> Bool in
+                
+                let key = result.key
+                
+                if let getId = item.id, key == getId {
+                    self.setupBlackView(warningImage: UIImage(named: "Warning_Icon")!, messageTitle: "Alredy Added")
+                    return false
+                } else {
+                    self.cartList[item.id!] = item
+                    self.moveDownNotification()
+                    self.cartProductCount.text = "\(Int(cartList.count))"
+                    return true
+                }
+            }
+        }
     }
     
 }
 
 extension HomeViewController : CartListDelegate {
+    
     func updateCartList(_ list: [Product]) {
-        self.cartList = list
+        if list.count > 0 {
+            for product in list {
+                self.cartList[product.id!] = product
+            }
+        } else {
+            self.cartList.removeAll()
+        }
         self.cartProductCount.text = "\(cartList.count)"
     }
+}
+
+extension HomeViewController : ProductDelegate {
+    
+    func getProductList(productList: [AnyObject]) {
+        if !productList.isEmpty{
+            self.productList = productList as! [Product]
+        } else if productList.isEmpty && !productSearchField.text!.isEmpty {
+            setupBlackView(warningImage: UIImage(named: "NotFound")!, messageTitle: "Product not found!")
+        }
+        productView.reloadData()
+    }
+
 }
