@@ -22,24 +22,30 @@ class ProductViewController: UIViewController {
     @IBOutlet weak var qtyLabel : UILabel!
     @IBOutlet weak var qtyStepper : UIStepper!
     @IBOutlet weak var addCartButton : UIButton!
+    @IBOutlet weak var stockQtyLabel: UILabel!
     
     public var getProductDetails : Product!
-    private var homeController = HomeViewController()
-    weak var cartDelegate : CartDelegete?
+    public weak var cartDelegate : CartDelegete?
+    
+    fileprivate var homeController = HomeViewController()
+    fileprivate var productVM : ProductViewModel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         if let productDetails = getProductDetails {
             
-            self.productImage.image = UIImage(named: productDetails.productImage)!
-            self.catogaryLabel.text = productDetails.catogaryName
-            self.productNameLabel.text = productDetails.productName
-            self.descriptionLabel.text = "Imported"
-            self.priceLabel.text = "රු\(productDetails.productPrice) per kg"
-            
+            self.productImage.image = UIImage(named: "Fish 1")!
+            self.catogaryLabel.text = productDetails.category!.name!
+            self.productNameLabel.text = productDetails.name!
+            self.descriptionLabel.text = productDetails.description
+            self.priceLabel.text = "\(String(productDetails.unitprice!).convertDoubleToCurrency()) per kg"
         }
+        let jwt_Token = UserDefaults.standard.object(forKey: "JWT_TOKEN") as! String
         
+        productVM = ProductViewModel(jwt_Token)
+        productVM.delegate = self
+        showStock()
     }
     
     override func viewWillLayoutSubviews() {
@@ -67,7 +73,7 @@ class ProductViewController: UIViewController {
         
     }
     
-    @objc private func cancelButtonPressed(){
+    @objc fileprivate func cancelButtonPressed(){
         self.dismiss(animated: true, completion: nil)
     }
     
@@ -79,8 +85,32 @@ class ProductViewController: UIViewController {
     
     @IBAction func addCartDidPressed() {
         
-        getProductDetails.productQty = Int(qtyStepper.value)
+        getProductDetails.qty = Int(qtyStepper.value)
         cartDelegate?.addedItemToCart(getProductDetails)
         self.dismiss(animated: true, completion: nil)
     }
+    
+    fileprivate func showStock(){
+        if let product = getProductDetails {
+            productVM.getStockByProductId(product.id!)
+            
+        }
+    }
+}
+
+extension ProductViewController : ProductDelegate {
+    func getProductList(_ productList: [Product]) {
+    }
+    
+    func getAvailableProductStock(_ qty: Int) {
+        self.qtyStepper.maximumValue = Double(qty)
+        stockQtyLabel.text = "Available stock in \(qty) Kg"
+        if qty > 0 {
+            addCartButton.isEnabled = true
+        } else {
+            addCartButton.isEnabled = false
+        }
+    }
+    
+    
 }
