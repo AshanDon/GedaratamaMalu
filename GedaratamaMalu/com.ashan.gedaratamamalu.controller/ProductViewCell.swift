@@ -19,10 +19,12 @@ class ProductViewCell: UICollectionViewCell {
         didSet{
             guard let productDetails = product else { return }
             
-            self.productImage.image = UIImage(named: productDetails.productImage)
-            self.catagoryNameLabel.text = productDetails.catogaryName
-            self.productNameLabel.text = productDetails.productName
-            self.prouuctPrice.text = "\(String(productDetails.productPrice).convertDoubleToCurrency()) per kg"
+            self.productImage.image = UIImage(named: "Fish 1")
+            if let categoryName = productDetails.category!.name{
+                self.catagoryNameLabel.text = categoryName
+            }
+            self.productNameLabel.text = productDetails.name!
+            self.prouuctPrice.text = "\(String(productDetails.unitprice!).convertDoubleToCurrency()) per kg"
         }
     }
 
