@@ -9,21 +9,37 @@ import Foundation
 
 struct Product : Codable {
     
-    var productId : Int
-    var productImage : String
-    var catogaryName : String
-    var productName : String
-    var description : String
-    var productPrice : Double
-    var productQty : Int = 1
-    
-    init(productId :Int,productImage :String,catogaryName :String,productName :String,description :String,productPrice :Double,productQty :Int) {
-        self.productId = productId
-        self.productImage = productImage
-        self.catogaryName = catogaryName
-        self.productName = productName
-        self.description = description
-        self.productPrice = productPrice
-        self.productQty = productQty
+    let id : Int?
+    let name : String?
+    let description : String?
+    let unitprice : Double?
+    var qty : Int?
+    let date : String?
+    let category : Category?
+    let supplier : Supplier?
+
+    enum CodingKeys: String, CodingKey {
+
+        case id = "id"
+        case name = "name"
+        case description = "description"
+        case unitprice = "unitprice"
+        case date = "date"
+        case category = "category"
+        case supplier = "supplier"
+        case qty
     }
+
+    init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        id = try values.decodeIfPresent(Int.self, forKey: .id)
+        name = try values.decodeIfPresent(String.self, forKey: .name)
+        description = try values.decodeIfPresent(String.self, forKey: .description)
+        unitprice = try values.decodeIfPresent(Double.self, forKey: .unitprice)
+        date = try values.decodeIfPresent(String.self, forKey: .date)
+        category = try values.decodeIfPresent(Category.self, forKey: .category)
+        supplier = try values.decodeIfPresent(Supplier.self, forKey: .supplier)
+        qty = try values.decodeIfPresent(Int.self, forKey: .qty)
+    }
+    
 }
