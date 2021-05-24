@@ -174,6 +174,7 @@
 		6309F23625AF6D5C00C262C2 /* com.ashan.gedaratamamalu.controller */ = {
 			isa = PBXGroup;
 			children = (
+				634CFCDA265AC4DD0064A2D6 /* BasketCell.swift */,
 				63A8A2D12599FDBD00921E83 /* PresentController.swift */,
 				63D58EB1263A923E00707F6F /* AlertPopOverViewController.swift */,
 				63B25E6A25B2CADD002D970D /* ProductViewCell.swift */,
@@ -235,7 +236,6 @@
 				63B25E6B25B2CADD002D970D /* ProductViewCell.xib */,
 				63ED252425B9D1E200D8DDA6 /* CartRowViewCell.xib */,
 				636F9F7325BCBB4C000863AC /* MenuViewCell.xib */,
-				634CFCDA265AC4DD0064A2D6 /* BasketCell.swift */,
 				634CFCDB265AC4DD0064A2D6 /* BasketCell.xib */,
 			);
 			path = com.ashan.gedaratamamalu.view;
