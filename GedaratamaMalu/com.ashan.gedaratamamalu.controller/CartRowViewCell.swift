@@ -22,13 +22,12 @@ class CartRowViewCell: UITableViewCell {
         didSet{
             guard let details = getRowDetail else { return }
             
-            self.productImageView.image = UIImage(named: details.productImage)
-            self.productNameLabel.text = details.productName
-            
-            self.unitPriceLabel.text =  String(details.productPrice).convertDoubleToCurrency()
-            self.qtyLabel.text = "\(details.productQty)"
-            self.priceLabel.text = String(details.productPrice * Double(details.productQty)).convertDoubleToCurrency()
-            
+            self.productImageView.image = UIImage(named: "Fish 1")
+            self.productNameLabel.text = details.name!
+            self.unitPriceLabel.text =  "\(String(details.unitprice!).convertDoubleToCurrency()) per Kg"
+            let qty = details.qty ?? 0
+            self.qtyLabel.text = String(qty)
+            self.priceLabel.text = String(details.unitprice! * Double(qty)).convertDoubleToCurrency()
         }
     }
     
