@@ -74,6 +74,56 @@ extension UITextField {
         rightViewMode = .always
         self.tintColor = color
     }
+    
+    func setupRightCustomImage(imageName:String, color:UIColor, width:CGFloat, height:CGFloat){
+        let imageView = UIImageView(frame: CGRect(x: -7, y: 0, width: width, height: height))
+        imageView.image = UIImage(named: imageName)
+        let imageContainerView: UIView = UIView(frame: CGRect(x: 0, y: 0, width: width, height: height))
+        imageContainerView.addSubview(imageView)
+        rightView = imageContainerView
+        rightViewMode = .always
+        self.tintColor = color
+    }
+    
+    func setupBottomLine(lineHeight : CGFloat, lineColor : UIColor){
+        let bottomLine = CALayer()
+        bottomLine.frame = CGRect(x: 0.0, y: self.bounds.height - lineHeight, width: self.bounds.width, height: lineHeight)
+        bottomLine.backgroundColor = lineColor.cgColor
+                
+        self.borderStyle = UITextField.BorderStyle.none
+        self.layer.addSublayer(bottomLine)
+    }
+    
+    @IBInspectable var doneAccessory: Bool{
+        get{
+            return self.doneAccessory
+        }
+        set (hasDone) {
+            if hasDone{
+                addDoneButtonOnKeyboard()
+            }
+        }
+    }
+    
+    func addDoneButtonOnKeyboard()
+    {
+        let doneToolbar: UIToolbar = UIToolbar(frame: CGRect.init(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 50))
+        doneToolbar.barStyle = .default
+        
+        let flexSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+        let done: UIBarButtonItem = UIBarButtonItem(title: "Done", style: .done, target: self, action: #selector(self.doneButtonAction))
+        
+        let items = [flexSpace, done]
+        doneToolbar.items = items
+        doneToolbar.sizeToFit()
+        
+        self.inputAccessoryView = doneToolbar
+    }
+    
+    @objc func doneButtonAction()
+    {
+        self.resignFirstResponder()
+    }
 }
 
 extension UIView{
