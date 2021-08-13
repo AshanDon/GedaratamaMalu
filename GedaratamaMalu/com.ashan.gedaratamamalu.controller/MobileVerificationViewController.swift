@@ -8,6 +8,10 @@
 import UIKit
 import NVActivityIndicatorView
 
+@objc protocol MobileVerifyDelegate {
+    @objc optional func clearRegistrationFields()
+}
+
 class MobileVerificationViewController: UIViewController {
     
     
@@ -34,6 +38,8 @@ class MobileVerificationViewController: UIViewController {
     fileprivate var jwt_Token : String!
     
     fileprivate var registerMV : RegisterModelView!
+    
+    public var delegate : MobileVerifyDelegate!
     
     var profile : Profile!
     
@@ -367,7 +373,6 @@ class MobileVerificationViewController: UIViewController {
         super.viewDidAppear(animated)
         
         if let profile = profile{
-            print(profile.mobile)
             self.mobileNoField.text = profile.mobile
         }
     }
@@ -490,6 +495,7 @@ class MobileVerificationViewController: UIViewController {
     
     fileprivate func saveProfile(){
         if let saveProfile = profile{
+            print(saveProfile)
             registerMV.createNewProfile(saveProfile)
         }
     }
@@ -502,9 +508,7 @@ class MobileVerificationViewController: UIViewController {
             
             let otpCode : String = "\(digit1)\(digit2)\(digit3)\(digit4)"
             
-            if let getProfile = profile{
-                otpMV.validateOTP(getProfile.userName, otpCode)
-            }
+            otpMV.validateOTP(profile.userName!, otpCode)
             
         }
     }
@@ -555,8 +559,35 @@ class MobileVerificationViewController: UIViewController {
         let userDefault = UserDefaults.standard
         userDefault.set(true, forKey: "IS_LOGGING")
     }
+    
+    fileprivate func setupCustomAlert(){
+        
+        let alertMessage = ShowCustomAlertMessage()
+        
+        guard let window = UIApplication.shared.windows.filter({$0.isKeyWindow}).first else { return }
+        
+        alertMessage.frame = window.frame
+        
+        alertMessage.errorMessageLabel.attributedText = NSAttributedString(string: "Server error..! \n The operation couldn't be completed.", attributes: [
+                                                                            NSAttributedString.Key.font : UIFont.boldSystemFont(ofSize: 18)])
+        alertMessage.errorImageView.image = UIImage(named: "ServerError_Image")
+        
+        alertMessage.errorButton.setTitle("Retry", for: .normal)
+        
+        alertMessage.errorButton.addTarget(self, action: #selector(errorButtonDidPressed(_:)), for: .touchUpInside)
+        
+        view.addSubview(alertMessage)
+    }
+    
+    
+    @objc fileprivate func errorButtonDidPressed(_ sender : UIButton){
+        self.dismiss(animated: true) {
+            self.delegate.clearRegistrationFields?()
+        }
+    }
 }
 
+//MARK:- UITextFieldDelegate
 extension MobileVerificationViewController : UITextFieldDelegate {
     
     func textFieldDidChangeSelection(_ textField: UITextField) {
@@ -613,6 +644,7 @@ extension MobileVerificationViewController : UITextFieldDelegate {
     }
 }
 
+//MARK:- OTPDelegate
 extension MobileVerificationViewController : OTPDelegate {
     func validateOTPResult(_ result: Bool) {
         if result {
@@ -623,16 +655,26 @@ extension MobileVerificationViewController : OTPDelegate {
     }
 }
 
+//MARK:- RegistrationDelegate
 extension MobileVerificationViewController : RegistrationDelegate{
+    func getProfileInfo(_ profile: Profile?) {}
+    
     func getResponse(_ response: ApiResponse) {
+        print(response.status!)
         if response.status == "201"{
+            
+            let userDefault = UserDefaults.standard
+            
+            if let profileInfo = profile{
+                userDefault.set(profileInfo.userName, forKey: "USER_NAME")
+                userDefault.set(profileInfo.password, forKey: "PASSWORD")
+            }
+            
             setupAnimation()
+        } else {
+            setupCustomAlert()
         }
     }
     
-    func getUniqueFieldResult(_ field: String, _ result: Bool) {
-        
-    }
-    
-    
+    func getUniqueFieldResult(_ field: String, _ result: Bool) { }
 }

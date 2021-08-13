@@ -30,15 +30,14 @@ class CheckoutPayViewCell: UITableViewCell {
     }
     
     @IBAction func payMethodClicked(_ sender: UIButton) {
-        let buttonArray = [cardPayButton,cashPayButton]
-
-            buttonArray.forEach{
-
-                $0?.isSelected = false
-                $0?.setBackgroundImage(UIImage(named: "PayType_Icon"), for: .normal)
-            }
-
-            sender.isSelected = true
-            sender.setBackgroundImage(UIImage(named: "SelectedPayType_Icon"), for: .normal)
+        
+        PlaceOrderViewController.buttonArray.forEach{
+            
+            $0.isSelected = false
+            $0.setBackgroundImage(UIImage(named: "PayType_Icon"), for: .normal)
+        }
+        
+        sender.isSelected = true
+        sender.setBackgroundImage(UIImage(named: "SelectedPayType_Icon"), for: .normal)
     }
 }

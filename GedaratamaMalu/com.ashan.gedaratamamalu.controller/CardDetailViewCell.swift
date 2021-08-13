@@ -17,10 +17,10 @@ class CardDetailViewCell: UITableViewCell {
     public var cardList : CreditCard! {
         didSet{
             guard let details = cardList else { return }
-            
-            self.cartTypeImage.image = details.cardTypeImage
-            self.cardNumberLabel.text = details.cardNumber
-            self.cardExpLabel.text = details.expiryDate
+            self.cartTypeImage.image = UIImage(named: details.cardTypeImage!)
+            self.cardNumberLabel.text = "xxxx-\(details.cardNumber!.suffix(4))"
+            let splitDate = details.expiryDate!.split(separator: "/")
+            self.cardExpLabel.text = "Expires in: \(splitDate[0])/\(splitDate[1].suffix(2))"
         }
     }
     

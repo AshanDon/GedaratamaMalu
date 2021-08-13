@@ -18,6 +18,11 @@ class AddressViewController: UIViewController {
     @IBOutlet weak var conteinerViewHeight: NSLayoutConstraint!
     @IBOutlet weak var mainViewBottomConstraint: NSLayoutConstraint!
     
+    fileprivate var addressMV : AddressModelView!
+    fileprivate var registerMV : RegisterModelView!
+    fileprivate var profileInfo : Profile!
+    fileprivate let alertView = ShowCustomAlertMessage()
+    
     private lazy var touchView : UIView = {
        let tView = UIView()
         tView.isUserInteractionEnabled = true
@@ -34,6 +39,7 @@ class AddressViewController: UIViewController {
         viewController.view.autoresizingMask = [.flexibleWidth,.flexibleHeight]
         viewController.didMove(toParent: self)
         viewController.delegate = self
+        viewController.saveAddressButton.addTarget(self, action: #selector(billingSaveButtonDidPressed), for: .touchUpInside)
         return viewController
     }()
     
@@ -51,7 +57,15 @@ class AddressViewController: UIViewController {
 
         loadSubView()
         
+        let jwtToken = UserDefaults.standard.object(forKey: "JWT_TOKEN") as! String
+        registerMV = RegisterModelView(jwtToken)
+        addressMV = AddressModelView(jwtToken)
+    
+        registerMV.delegate = self
+        addressMV.delegate = self
         
+        //get profile infomation
+        loadDefaultUserInfo()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -154,6 +168,95 @@ class AddressViewController: UIViewController {
         
         contentScrollView.scrollIndicatorInsets = edgeInsets
     }
+    
+    fileprivate func loadDefaultUserInfo(){
+        
+        let userName = UserDefaults.standard.object(forKey: "USER_NAME") as! String
+        registerMV.getProfileInfoByUserName(UserName: userName)
+        
+    }
+    
+    @objc fileprivate func billingSaveButtonDidPressed(){
+        if billingAddresVC.firstNameField.text!.isEmpty{
+            billingAddresVC.firstNameField.setupRightCustomImage(imageName: "Empty_Icon", color: .red)
+        } else if billingAddresVC.lastNameField.text!.isEmpty{
+            billingAddresVC.lastNameField.setupRightCustomImage(imageName: "Empty_Icon", color: .red)
+        } else if billingAddresVC.houseNoField.text!.isEmpty{
+            billingAddresVC.houseNoField.setupRightCustomImage(imageName: "Empty_Icon", color: .red)
+        } else if billingAddresVC.townNameField.text!.isEmpty {
+            billingAddresVC.townNameField.setupRightCustomImage(imageName: "Empty_Icon", color: .red)
+        } else if billingAddresVC.postalCodeField.text!.isEmpty{
+            billingAddresVC.postalCodeField.setupRightCustomImage(imageName: "Empty_Icon", color: .red)
+        } else if billingAddresVC.phoneField.text!.isEmpty {
+            billingAddresVC.phoneField.setupRightCustomImage(imageName: "Empty_Icon", color: .red)
+        } else if billingAddresVC.emailField.text!.isEmpty {
+            billingAddresVC.emailField.setupRightCustomImage(imageName: "Empty_Icon", color: .red)
+        } else {
+            
+            if Connectivity.isConnectedToInternet() {
+                guard let firstName = billingAddresVC.firstNameField.text else { return }
+                guard let lastName = billingAddresVC.lastNameField.text else { return }
+                guard let houseNo = billingAddresVC.houseNoField.text else { return }
+                guard let apartmentNo = billingAddresVC.apartmentNo.text else { return }
+                guard let town = billingAddresVC.townNameField.text else { return }
+                guard let postalCode = billingAddresVC.postalCodeField.text else { return }
+                guard let phone = billingAddresVC.phoneField.text else { return }
+                guard let email = billingAddresVC.emailField.text else { return }
+                
+                guard let coordinate = billingAddresVC.selectedCoordinate else { return }
+                
+                let addressType = AddressType(id: 1, type: "Billing", status: true, date: Date().getFormattedDate())
+                
+                let addressDetails = AddressDetail(id: 0, addressType: addressType, profile: profileInfo, firstName: firstName, lastName: lastName, houseNo: houseNo, apartmentNo: apartmentNo, city: town, postalCode: postalCode, latitude: String(coordinate.latitude), longitude: String(coordinate.longitude), mobile: phone, email: email)
+                
+                addressMV.saveAddressInfomation(addressDetails)
+            } else {
+                showAlertMesage(AlertMessage: "No Internet Connection", AlertImage: UIImage(named: "InternetConnection_Icon")!, ButtonTitle: .relaunch)
+            }
+        }
+    }
+    
+    fileprivate func showAlertMesage(AlertMessage message : String,AlertImage image : UIImage, ButtonTitle : ButtonType){
+        
+        guard let window = UIApplication.shared.windows.filter({$0.isKeyWindow}).first else { return }
+        
+        alertView.frame = window.frame
+        
+        alertView.errorImageView.image = image
+        alertView.errorMessageLabel.attributedText = NSAttributedString(string: message, attributes: [
+                                                                            NSAttributedString.Key.font : UIFont.boldSystemFont(ofSize: 18)])
+        alertView.errorButton.setTitle(ButtonTitle.rawValue, for: .normal)
+        alertView.errorButton.addTarget(self, action: #selector(dismissAlertView(_:)), for: .touchUpInside)
+        
+        view.addSubview(alertView)
+    }
+    
+    @objc fileprivate func dismissAlertView(_ sender : UIButton){
+        
+        guard let title = sender.currentTitle else { return }
+        
+        switch title {
+        case "Done":
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.5) {
+                self.billingAddresVC.clearFields()
+                self.alertView.removeFromSuperview()
+            }
+            break
+        case "Retry":
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.5) {
+                self.dismiss(animated: true, completion: nil)
+            }
+            break
+        case "Relaunch":
+            UIApplication.shared.perform(#selector(NSXPCConnection.suspend))
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                exit(0)
+            }
+            break
+        default:
+            break
+        }
+    }
 }
 
 extension AddressViewController : MapDelegate{
@@ -179,4 +282,50 @@ extension AddressViewController : MapDelegate{
         self.present(mapVC, animated: true, completion: nil)
     }
     
+}
+
+//MARK:- RegistrationDelegate
+extension AddressViewController : RegistrationDelegate{
+    
+    func getProfileInfo(_ profile: Profile?) {
+        if let info = profile {
+            billingAddresVC.firstNameField.text = info.firstName
+            billingAddresVC.lastNameField.text = info.lastName
+            billingAddresVC.phoneField.text = info.mobile
+            billingAddresVC.emailField.text = info.email
+            profileInfo = info
+        }
+    }
+    
+    func getResponse(_ response: ApiResponse) { }
+    
+    func getUniqueFieldResult(_ field: String, _ result: Bool) { }
+    
+}
+
+//MARK:- AddressDelegate
+extension AddressViewController : AddressDelegate {
+    
+    func getBillingAddressInfo(BillingAddress details: AddressDetail) { }
+    
+    func showCustomAlertMessage(HttpCode code: Int) {
+        
+        switch HttpStatus(rawValue: code) {
+        
+        case .created:
+            showAlertMesage(AlertMessage: "Done..! \n Billing Address has been successfully saved.", AlertImage: UIImage(named: "Intraduction2")!, ButtonTitle: .done)
+            break
+        case .internalServerError:
+            showAlertMesage(AlertMessage: "Server Error..! \n The Billing Address was unsuccessfully saved.", AlertImage: UIImage(named: "ServerError_Image")!, ButtonTitle: .retry)
+            break
+        case .badRequest:
+            showAlertMesage(AlertMessage: "Server Error..! \n The Billing Address was unsuccessfully saved.", AlertImage: UIImage(named: "ServerError_Image")!, ButtonTitle: .retry)
+            break
+        case .notFound:
+            break
+        case .none:
+            break
+        }
+        
+    }
 }

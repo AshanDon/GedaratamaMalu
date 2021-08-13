@@ -313,9 +313,11 @@ class HomeViewController: UIViewController {
 
         do {
             var temporyList = [Product]()
+            
             for cartProduct in cartList {
                 temporyList.append(cartProduct.value)
             }
+            
             let data = try encoder.encode(temporyList)
             try data.write(to: dataFilePath!)
 
@@ -426,6 +428,7 @@ extension HomeViewController : UICollectionViewDelegate,UICollectionViewDataSour
         productCell.addCartButton.tag = indexPath.row
         productCell.addCartButton.addTarget(self, action: #selector(addToCartButtonDidPressed), for: .touchUpInside)
         
+        
         return productCell
     }
     
@@ -523,5 +526,4 @@ extension HomeViewController : ProductDelegate {
         }
         productView.reloadData()
     }
-
 }

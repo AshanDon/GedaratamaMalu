@@ -11,6 +11,7 @@ import Alamofire
 @objc protocol ProductDelegate{
     @objc optional func getProductList(productList : [AnyObject])
     @objc optional func getAvailableProductStock(_ qty : Int)
+    @objc optional func getProductImage(_ imageData : NSData)
 }
 
 class ProductViewModel{
@@ -120,6 +121,37 @@ class ProductViewModel{
                     do{
                         let decodeData = try JSONDecoder().decode([Product].self, from: data)
                         strongeSelf.delegate.getProductList?(productList: decodeData as [AnyObject])
+                    } catch let decodeException {
+                        print(decodeException.localizedDescription)
+                    }
+                   }
+    }
+    
+    
+    public func getProductImage(ProductCode code : Int){
+        var url : String {
+            return "\(baseURL)/product_image/\(code)"
+        }
+        
+        AF.request(url,
+                   method: .get,
+                   parameters: nil,
+                   encoding: URLEncoding.queryString,
+                   headers: getHTTPHeaders()).responseJSON { [weak self] (response) in
+                    guard let strongeSelf = self else { return }
+                    
+                    if let getError = response.error {
+                        print(print(getError.localizedDescription))
+                    }
+                    
+                    guard let data = response.data else { return }
+                    
+                    do{
+                        let decodeData = try JSONDecoder().decode(String.self, from: data)
+                        if let url = URL(string: decodeData){
+                            let data : NSData = try NSData(contentsOf: url, options: [])
+                            strongeSelf.delegate.getProductImage?(data)
+                        }
                     } catch let decodeException {
                         print(decodeException.localizedDescription)
                     }

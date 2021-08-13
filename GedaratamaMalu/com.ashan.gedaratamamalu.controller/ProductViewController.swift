@@ -33,19 +33,13 @@ class ProductViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        if let productDetails = getProductDetails {
-            
-            self.productImage.image = UIImage(named: "Fish 1")!
-            self.catogaryLabel.text = productDetails.category!.name!
-            self.productNameLabel.text = productDetails.name!
-            self.descriptionLabel.text = productDetails.description
-            self.priceLabel.text = "\(String(productDetails.unitprice!).convertDoubleToCurrency()) per kg"
-        }
         let jwt_Token = UserDefaults.standard.object(forKey: "JWT_TOKEN") as! String
         
         productVM = ProductViewModel(jwt_Token)
         productVM.delegate = self
+        
         showStock()
+        showProductDetails()
     }
     
     override func viewWillLayoutSubviews() {
@@ -96,11 +90,19 @@ class ProductViewController: UIViewController {
             
         }
     }
+    
+    fileprivate func showProductDetails(){
+        if let productDetails = getProductDetails {
+            self.productVM.getProductImage(ProductCode: productDetails.id!)
+            self.catogaryLabel.text = productDetails.category!.name!
+            self.productNameLabel.text = productDetails.name!
+            self.descriptionLabel.text = productDetails.description
+            self.priceLabel.text = "\(String(productDetails.unitprice!).convertDoubleToCurrency()) per kg"
+        }
+    }
 }
 
 extension ProductViewController : ProductDelegate {
-    func getProductList(_ productList: [Product]) {
-    }
     
     func getAvailableProductStock(_ qty: Int) {
         self.qtyStepper.maximumValue = Double(qty)
@@ -112,5 +114,7 @@ extension ProductViewController : ProductDelegate {
         }
     }
     
-    
+    func getProductImage(_ imageData: NSData) {
+        self.productImage.image = UIImage(data: imageData as Data)
+    }
 }

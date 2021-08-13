@@ -11,9 +11,23 @@ import UIKit
 
 class PresentController {
     
+    fileprivate let userDefault = UserDefaults.standard
+    fileprivate var authenticationVM = AuthenticationViewModel()
+    
     public func isLogedIn() -> Bool {
-        let userDefault = UserDefaults.standard
+        genareteJWTToken()
         return userDefault.bool(forKey: "IS_LOGGING") 
+        
+    }
+    
+    fileprivate func genareteJWTToken(){
+        
+        let userName = userDefault.object(forKey: "USER_NAME") as? String ?? "AshanDon"
+        let password = userDefault.object(forKey: "PASSWORD") as? String ?? "ashan123"
+        
+        authenticationVM.authDelegate = self
+        
+        authenticationVM.getUserProfile(userName, password)
         
     }
     
@@ -34,6 +48,25 @@ class PresentController {
         tabarVC.modalPresentationStyle = .fullScreen
         
         return tabarVC
+        
+    }
+    
+    @objc fileprivate func buttonDidPressed(){
+        
+    }
+}
+
+//MARK:- AuthenticationDelegate
+extension PresentController : AuthenticationDelegate{
+    func getTokenInfo(_ token: String, _ userName: String, _ password: String) {
+        userDefault.set(token, forKey: "JWT_TOKEN")
+        userDefault.set(userName, forKey: "USER_NAME")
+        userDefault.set(password, forKey: "PASSWORD")
+    }
+    
+    func getSignInError(_ message: String) {
+        
+        NotificationCenter.default.post(name: NSNotification.Name("USER_NOT_FOUND_ALERT"), object: message)
         
     }
 }

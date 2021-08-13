@@ -8,14 +8,14 @@
 import Foundation
 import UIKit
 
-struct CreditCard {
+struct CreditCard : Codable{
     
-    let cardNumber : String
-    let cardTypeImage : UIImage
-    let expiryDate : String
-    let securityCode : String
+    let cardNumber : String?
+    let cardTypeImage : String?
+    let expiryDate : String?
+    let securityCode : String?
     
-    init(cardNumber : String, cardTypeImage : UIImage,expiryDate : String, securityCode : String) {
+    init(cardNumber : String,cardTypeImage : String,expiryDate : String,securityCode : String) {
         self.cardNumber = cardNumber
         self.cardTypeImage = cardTypeImage
         self.expiryDate = expiryDate

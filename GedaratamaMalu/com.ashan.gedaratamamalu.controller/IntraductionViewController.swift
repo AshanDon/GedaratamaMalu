@@ -65,7 +65,9 @@ class IntraductionViewController: UIViewController {
         super.viewDidAppear(animated)
         
         let userDefault = UserDefaults.standard
-        print(userDefault.object(forKey: "JWT_TOKEN") as! String)
+        guard let _ = userDefault.object(forKey: "JWT_TOKEN") as? String else {
+            return
+        }
     }
     
     override func viewDidLayoutSubviews() {
@@ -185,6 +187,13 @@ class IntraductionViewController: UIViewController {
         signInView.modalTransitionStyle = .coverVertical
         
         signInView.modalPresentationStyle = .fullScreen
+        
+        let transition = CATransition()
+        transition.duration = 0.5
+        transition.type = .moveIn
+        transition.subtype = .fromTop
+        transition.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+        self.view.window!.layer.add(transition, forKey: kCATransition)
         
         self.navigationController?.present(signInView, animated: true, completion: nil)
         

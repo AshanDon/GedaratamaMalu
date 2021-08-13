@@ -277,6 +277,13 @@ class SignInViewController: UIViewController {
         
         registerVC.modalPresentationStyle = .fullScreen
         
+        let transition = CATransition()
+        transition.duration = 0.5
+        transition.type = .moveIn
+        transition.subtype = .fromTop
+        transition.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+        self.view.window!.layer.add(transition, forKey: kCATransition)
+        
         self.present(registerVC, animated: true, completion: nil)
         
     }
@@ -335,6 +342,14 @@ class SignInViewController: UIViewController {
         tabBarVC.modalTransitionStyle = .coverVertical
         
         if let window = UIApplication.shared.windows.first {
+            
+            let transition = CATransition()
+            transition.duration = 0.5
+            transition.type = .moveIn
+            transition.subtype = .fromLeft
+            transition.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+            window.layer.add(transition, forKey: kCATransition)
+            
             window.rootViewController = tabBarVC
             window.makeKeyAndVisible()
             
@@ -389,9 +404,14 @@ extension SignInViewController : UITextFieldDelegate {
 }
 
 extension SignInViewController : AuthenticationDelegate {
-    func getJwtToken(token: String) {
+    
+    func getTokenInfo(_ token: String, _ userName: String, _ password: String) {
         let userDefault = UserDefaults.standard
+        
         userDefault.set(token, forKey: "JWT_TOKEN")
+        userDefault.set(userName, forKey: "USER_NAME")
+        userDefault.set(password, forKey: "PASSWORD")
+        
         presentAnimationView()
     }
     

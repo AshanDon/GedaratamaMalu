@@ -17,6 +17,7 @@ struct Product : Codable {
     let date : String?
     let category : Category?
     let supplier : Supplier?
+    let productImage : [ProductImage]?
 
     enum CodingKeys: String, CodingKey {
 
@@ -27,6 +28,7 @@ struct Product : Codable {
         case date = "date"
         case category = "category"
         case supplier = "supplier"
+        case productImage = "productImage"
         case qty
     }
 
@@ -40,6 +42,7 @@ struct Product : Codable {
         category = try values.decodeIfPresent(Category.self, forKey: .category)
         supplier = try values.decodeIfPresent(Supplier.self, forKey: .supplier)
         qty = try values.decodeIfPresent(Int.self, forKey: .qty)
+        productImage = try values.decodeIfPresent([ProductImage].self, forKey: .productImage)
     }
     
 }

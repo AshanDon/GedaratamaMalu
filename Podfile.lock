@@ -1,0 +1,30 @@
+PODS:
+  - Alamofire (5.4.3)
+  - CreditCardValidator (0.5.1)
+  - MonthYearPicker (4.0.2)
+  - NVActivityIndicatorView (5.1.1):
+    - NVActivityIndicatorView/Base (= 5.1.1)
+  - NVActivityIndicatorView/Base (5.1.1)
+
+DEPENDENCIES:
+  - Alamofire (~> 5.2)
+  - CreditCardValidator
+  - MonthYearPicker (~> 4.0.2)
+  - NVActivityIndicatorView
+
+SPEC REPOS:
+  trunk:
+    - Alamofire
+    - CreditCardValidator
+    - MonthYearPicker
+    - NVActivityIndicatorView
+
+SPEC CHECKSUMS:
+  Alamofire: e447a2774a40c996748296fa2c55112fdbbc42f9
+  CreditCardValidator: b312e6d6df827d5828eae3905da6812262715b32
+  MonthYearPicker: 91f77106e6806d8c93c69e943ab0795fd420657f
+  NVActivityIndicatorView: 1f6c5687f1171810aa27a3296814dc2d7dec3667
+
+PODFILE CHECKSUM: 7650726dd71efc9ae7a3dd5cda26d481b8ac92a1
+
+COCOAPODS: 1.10.1

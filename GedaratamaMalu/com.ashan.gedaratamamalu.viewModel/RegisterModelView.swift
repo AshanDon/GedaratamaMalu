@@ -11,6 +11,8 @@ import Alamofire
 protocol RegistrationDelegate {
     func getResponse(_ response : ApiResponse)
     func getUniqueFieldResult(_ field : String ,_ result : Bool)
+    func getProfileInfo(_ profile : Profile?)
+    
 }
 
 class RegisterModelView{
@@ -130,7 +132,34 @@ class RegisterModelView{
     }
     
     
-    
+    public func getProfileInfoByUserName(UserName name : String){
+        
+        var url : String {
+            return "\(baseURL)/profile/user_Name/\(name)"
+        }
+        
+        
+        AF.request(url,
+                   method: .get,
+                   parameters: nil,
+                   encoding: URLEncoding.queryString,
+                   headers: getHTTPHeaders()).responseJSON { [weak self] (response) in
+                    guard let strongeSelf = self else { return }
+                    
+                    if let getError = response.error {
+                        print(print(getError.localizedDescription))
+                    }
+                    
+                    guard let data = response.data else { return }
+                    
+                    do{
+                        let responseDetails = try JSONDecoder().decode(Profile.self, from: data)
+                        strongeSelf.delegate.getProfileInfo(responseDetails)
+                    } catch let decoderException {
+                        print(decoderException.localizedDescription )
+                    }
+                   }
+    }
     
     
     

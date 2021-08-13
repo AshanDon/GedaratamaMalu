@@ -7,6 +7,7 @@
 
 import UIKit
 import MapKit
+import CoreLocation
 
 protocol MapDelegate {
     func presentedMapView(_ viewController : UIViewController,_ adressType : String)
@@ -28,27 +29,27 @@ class BillingAddressViewController: UIViewController {
     
     var delegate : MapDelegate!
     
-    private lazy var mapTapView : UIView = {
-        let mapView = UIView()
-        mapView.isUserInteractionEnabled = true
-        mapView.frame = billingMap.bounds
-        mapView.backgroundColor = .clear
-        mapView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(showMapView)))
-        return mapView
-    }()
+    fileprivate let locationManager = CLLocationManager()
+    fileprivate var myAnnotation : MKPointAnnotation = MKPointAnnotation()
+    
+    var selectedCoordinate : CLLocationCoordinate2D?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        firstNameField.delegate = self
-        lastNameField.delegate = self
+        firstNameField.isEnabled = false
+        lastNameField.isEnabled = false
+        phoneField.isEnabled = false
+        emailField.isEnabled = false
+        
         houseNoField.delegate = self
         apartmentNo.delegate = self
         townNameField.delegate = self
         postalCodeField.delegate = self
-        phoneField.delegate = self
-        emailField.delegate = self
         
+        
+        // Billing Map 
+        billingMap.delegate = self
         billingMap.target(forAction: #selector(showMapView), withSender: nil)
         
     }
@@ -58,9 +59,13 @@ class BillingAddressViewController: UIViewController {
         super.viewWillAppear(animated)
         
         changeViewComponent()
-        
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        //setup cllocation Manager
+        determineCurrentLocation()
+    }
     
     private func  changeViewComponent(){
         view.layer.cornerRadius = 20.0
@@ -190,46 +195,136 @@ class BillingAddressViewController: UIViewController {
         //Save Address Button
         saveAddressButton.layer.cornerRadius = saveAddressButton.frame.height / 2
         
-       //TapView added to the map view
-        billingMap.addSubview(mapTapView)
+//       //TapView added to the map view
+//        billingMap.addSubview(mapTapView)
+        billingMap.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(showMapView)))
     }
     
     @objc private func showMapView(){
         delegate?.presentedMapView(self,"Billing")
     }
     
-    @IBAction func saveAddressPtrressed(_ sender: Any) {
-        if firstNameField.text!.isEmpty{
-            delegate?.presentedErrorMessage("Enter your first name")
-        } else if lastNameField.text!.isEmpty{
-            delegate?.presentedErrorMessage("Enter your last name")
-        } else if houseNoField.text!.isEmpty{
-            delegate?.presentedErrorMessage("Enter your house no and street name")
-        } else if townNameField.text!.isEmpty {
-            delegate?.presentedErrorMessage("Enter your town or city")
-        } else if postalCodeField.text!.isEmpty{
-            delegate?.presentedErrorMessage("Enter your postcode or zip")
-        } else if phoneField.text!.isEmpty {
-            delegate?.presentedErrorMessage("Enter your valid phone number")
-        } else if emailField.text!.isEmpty {
-            delegate?.presentedErrorMessage("Enter your valid email address")
-        } else {
-            print("Successfully Added")
+    public func clearFields(){
+        houseNoField.text = nil
+        apartmentNo.text = nil
+        townNameField.text = nil
+        postalCodeField.text = nil
+        billingMap.removeAnnotations(billingMap.annotations)
+    }
+    
+    fileprivate func determineCurrentLocation(){
+        //locationManager.startUpdatingLocation()
+        if CLLocationManager.locationServicesEnabled() {
+            checkLocationAutherization()
+        }
+    }
+    
+    fileprivate func checkLocationAutherization(){
+        switch CLLocationManager.authorizationStatus() {
+        case .notDetermined:
+            locationManager.requestWhenInUseAuthorization()
+            break
+        case .restricted:
+            print("restricted")
+            break
+        case .denied:
+            showLocationErrorAlert(Title: "Location Services Disabled", Message: "Please enable location services for this app.")
+            break
+        case .authorizedAlways:
+            locationManager.requestAlwaysAuthorization()
+            break
+        case .authorizedWhenInUse:
+            billingMap.showsUserLocation = true
+            centerViewOnUserLocation()
+            break
+        default:
+            break
+        }
+    }
+    
+    fileprivate func centerViewOnUserLocation(){
+        if let location =  locationManager.location?.coordinate{
+            let coordinateRegion = MKCoordinateRegion(center: location, span: MKCoordinateSpan(latitudeDelta: 0.5, longitudeDelta: 0.5))
+            billingMap.setRegion(coordinateRegion, animated: true)
+        }
+    }
+    
+    fileprivate func showLocationErrorAlert(Title title : String,Message message : String){
+        
+        let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        
+        let settingsButton = UIAlertAction(title: "Settings", style: .default) { (settingsAcction) in
+            if let bundleId = Bundle.main.bundleIdentifier,
+               let url = URL(string: "\(UIApplication.openSettingsURLString)&path=PRIVACY/LOCATION/\(bundleId)") {
+                print(url)
+                    UIApplication.shared.open(url, options: [:], completionHandler: nil)
+            }
+        }
+        
+        let cancelAction = UIAlertAction(title: "Cancel", style: .default) { _ in
+            alertController.dismiss(animated: true, completion: nil)
+        }
+        
+        alertController.addAction(settingsButton)
+        alertController.addAction(cancelAction)
+        
+        OperationQueue.main.addOperation {
+            self.present(alertController, animated: true, completion: nil)
         }
     }
 }
 
+//MARK:- UITextFieldDelegate
 extension BillingAddressViewController : UITextFieldDelegate{
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        if !textField.text!.isEmpty{
+            textField.rightView = nil
+        }
         textField.endEditing(true)
         return true
     }
 }
 
+//MARK:- MKMapViewDelegate
+extension BillingAddressViewController : MKMapViewDelegate {
+    
+    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+        if !(annotation is MKPointAnnotation) {
+            return nil
+        }
+        
+        let annotationIdentifier = "AnnotationIdentifier"
+        var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: annotationIdentifier)
+        
+        if annotationView == nil {
+            annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: annotationIdentifier)
+            annotationView!.canShowCallout = true
+            
+        }
+        else {
+            annotationView!.annotation = annotation
+        }
+        
+        let pinImage = UIImage(named: "Location_Icon")
+        annotationView!.image = pinImage
+        return annotationView
+    }
+}
+
+
 extension BillingAddressViewController : CustomLocationDelegate {
     
-    func getBillingLocation() {
-        print("get Billing Location...!")
+    func getBillingLocation(_ coordinate : CLLocationCoordinate2D) {
+        print(coordinate.latitude,coordinate.longitude)
+        
+        billingMap.showsUserLocation = false
+    
+        myAnnotation.coordinate = CLLocationCoordinate2DMake(coordinate.latitude,coordinate.longitude)
+        
+        billingMap.addAnnotation(myAnnotation)
+        
+        self.selectedCoordinate = coordinate
+        
     }
 }

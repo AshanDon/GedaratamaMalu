@@ -9,11 +9,13 @@ import UIKit
 import MapKit
 import CreditCardValidator
 import NVActivityIndicatorView
+import CoreLocation
 
 class PlaceOrderViewController: UIViewController {
 
     @IBOutlet weak var navigationBar: UINavigationBar!
     @IBOutlet weak var customerInfoView: UIView!
+    @IBOutlet weak var nameLabel: UILabel!
     @IBOutlet weak var mapView : MKMapView!
     @IBOutlet weak var deliveryInfoView: UIView!
     @IBOutlet weak var payMethodTable : UITableView!
@@ -21,10 +23,47 @@ class PlaceOrderViewController: UIViewController {
     @IBOutlet weak var mobileLabel: UILabel!
     @IBOutlet weak var placeOrderButton: UIButton!
     @IBOutlet weak var bottomView: UIView!
+    @IBOutlet weak var basketTotal: UILabel!
+    @IBOutlet weak var serviceCharge: UILabel!
+    @IBOutlet weak var totalAmount: UILabel!
+    @IBOutlet weak var scrollView: UIScrollView!
     
     @IBOutlet weak var payMethodtableHeight: NSLayoutConstraint!
+    @IBOutlet weak var bottomViewHeight: NSLayoutConstraint!
+    @IBOutlet weak var bottomViewSafeArea: NSLayoutConstraint! // default value = 0
+    
     
     fileprivate var creditCardList : [String:CreditCard] = [String:CreditCard]()
+    fileprivate var cardTableList : [CreditCard] = [CreditCard]()
+    fileprivate var paymentInfoList : [PaymentDetails] = [PaymentDetails]()
+    fileprivate var dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("TemparyCardList.plist")
+    fileprivate var basketAmount : Double? = Double()
+    fileprivate var myAnnotation : MKPointAnnotation = MKPointAnnotation()
+    fileprivate let locationManager = CLLocationManager()
+    fileprivate var addressMV : AddressModelView!
+    fileprivate var registerMV : RegisterModelView!
+    fileprivate var orderMV : OrderModelView!
+    fileprivate var paymentMV : PaymentModelView!
+    fileprivate var profileInfo : Profile!
+    fileprivate var addressInfo : AddressDetail!
+    fileprivate let showAlertMessage = ShowCustomAlertMessage()
+    fileprivate var payCard : CreditCard = CreditCard(cardNumber: "", cardTypeImage: "", expiryDate: "", securityCode: "")
+    fileprivate var payType : Payment = Payment(id: 1, type: "Cash", status: true, date: "2021-03-27 03:00:00")
+    fileprivate var payStatus : Bool = false
+    
+    static var buttonArray : [UIButton] = [UIButton]()
+    
+    var orderList : [Product]!{
+        didSet{
+            guard let list = orderList else { return }
+            
+            for product in list {
+                basketAmount? += product.unitprice! * Double(product.qty!)
+            }
+        }
+    }
+    
+    
     
     fileprivate lazy var backButton : UIButton = {
         let button = UIButton(frame: CGRect(x: 0, y: 0, width: 0, height: 44))
@@ -70,9 +109,8 @@ class PlaceOrderViewController: UIViewController {
         view.addSubview(totalPriceLabel)
         view.addSubview(infoLabel)
         view.addSubview(lineLabel2)
-        view.addSubview(cancelViewButton)
-        view.addSubview(payViewButton)
-        
+        view.addSubview(buttonStackView)
+
         return view
     }()
     
@@ -258,6 +296,19 @@ class PlaceOrderViewController: UIViewController {
         return label
     }()
     
+    fileprivate lazy var buttonStackView : UIStackView = {
+        let stackView = UIStackView()
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        stackView.spacing = CGFloat(15)
+        stackView.alignment = .center
+        stackView.axis = .horizontal
+        stackView.backgroundColor = .clear
+        
+        stackView.addSubview(cancelViewButton)
+        stackView.addSubview(payViewButton)
+        return stackView
+    }()
+    
     fileprivate lazy var cancelViewButton : UIButton = {
         let button = UIButton()
         button.setAttributedTitle(NSAttributedString(string: "Cancel", attributes: [
@@ -294,19 +345,44 @@ class PlaceOrderViewController: UIViewController {
         payMethodTable.register(UINib(nibName: "CheckoutPayViewCell", bundle: nil), forCellReuseIdentifier: "DEFAULT_PAY_CELL")
         payMethodTable.register(UINib(nibName: "CardDetailViewCell", bundle: nil), forCellReuseIdentifier: "CARD_DETAIL_CELL")
         
+        
+        
+        loadTemporyCard()
+        
+        setPayTableHeight()
+        
+        setPaymentSummary()
+        
+        //MARK:- get jwt token from User Defaults
+        let jwtToken = UserDefaults.standard.object(forKey: "JWT_TOKEN") as! String
+        
+        //MARK:- get userName from User Defaults
+        let userName = UserDefaults.standard.object(forKey: "USER_NAME") as! String
+        
+        addressMV = AddressModelView(jwtToken)
+        registerMV = RegisterModelView(jwtToken)
+        orderMV = OrderModelView(JwtToken: jwtToken)
+        paymentMV = PaymentModelView(JwtToken: jwtToken)
+        
+        //MARK:- delegate
         payMethodTable.delegate = self
         payMethodTable.dataSource = self
+        mapView.delegate = self
+        registerMV.delegate = self
+        addressMV.delegate = self
+        orderMV.delegate = self
+        paymentMV.delegate = self
+        scrollView.delegate = self
         
-        payMethodtableHeight.constant = 62.0 + (32 * CGFloat(creditCardList.count))
-        self.loadViewIfNeeded()
+        registerMV.getProfileInfoByUserName(UserName: userName)
+        
+        
     }
     
-
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
         setupViewLayout()
-        
     }
     
     override func viewWillLayoutSubviews() {
@@ -326,11 +402,18 @@ class PlaceOrderViewController: UIViewController {
         
         expireyTextField.addTarget(self, action: #selector(presentDatePickerView), for: .allTouchEvents)
         
+        basketAmountLabel.text = basketTotal.text
+        serviceChargeAmountLabel.text = serviceCharge.text
+        totalPriceLabel.text = totalAmount.text
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
     }
     
     fileprivate func setupViewLayout(){
         
-        let navigationItem = UINavigationItem(title: "Checkout")
+        let navigationItem = UINavigationItem(title: "Place Order")
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: backButton)
         
@@ -370,6 +453,11 @@ class PlaceOrderViewController: UIViewController {
         bottomView.applyViewShadow(color: UIColor(named: "Custom_Black_Color")!, alpha: 1, x: 0, y: -5, blur: 0, spread: 2)
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        determineCurrentLocation()
+    }
+    
     @objc fileprivate func backButtonDidPressed(){
         
         let transition = CATransition()
@@ -385,7 +473,9 @@ class PlaceOrderViewController: UIViewController {
     }
     
     @objc fileprivate func cashButtonDidPressed(_ : UIButton){
-        print("cash method")
+        payCard = CreditCard(cardNumber: "", cardTypeImage: "", expiryDate: "", securityCode: "")
+        payType = Payment(id: 1, type: "Cash", status: true, date: "2021-03-27 03:00:00")
+        payStatus = false
     }
     
     @objc fileprivate func cardButtonDidPressed(_ : UIButton){
@@ -402,11 +492,11 @@ class PlaceOrderViewController: UIViewController {
             //BlackView Constraint
             blackView.topAnchor.constraint(equalTo: view.topAnchor, constant: 0),
             blackView.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 0),
-            blackView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0),
+            blackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor,constant: 0),
             blackView.rightAnchor.constraint(equalTo: view.rightAnchor, constant: 0),
             
             //ContentView constraint
-            contentView.heightAnchor.constraint(equalToConstant: 550),
+            contentView.heightAnchor.constraint(greaterThanOrEqualToConstant: 550),
             contentView.widthAnchor.constraint(equalToConstant: blackView.frame.width),
             contentView.leftAnchor.constraint(equalTo: blackView.leftAnchor, constant: 0),
             contentView.bottomAnchor.constraint(equalTo: blackView.bottomAnchor, constant: 0),
@@ -513,20 +603,25 @@ class PlaceOrderViewController: UIViewController {
             lineLabel2.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 13),
             lineLabel2.rightAnchor.constraint(equalTo: contentView.rightAnchor, constant: -13),
             
-            //Cancel View Button Constraint
-            cancelViewButton.heightAnchor.constraint(equalToConstant: 45),
-            cancelViewButton.widthAnchor.constraint(lessThanOrEqualToConstant: 167),
-            cancelViewButton.topAnchor.constraint(equalTo: lineLabel2.bottomAnchor, constant: 20),
-            cancelViewButton.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 13),
-            cancelViewButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -20),
+            //Button Stack View Constraint
+            buttonStackView.heightAnchor.constraint(equalToConstant: 84),
+            buttonStackView.topAnchor.constraint(equalTo: lineLabel2.bottomAnchor, constant: 0),
+            buttonStackView.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 0),
+            buttonStackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: 0),
+            buttonStackView.rightAnchor.constraint(equalTo: contentView.rightAnchor, constant: 0),
             
+            //Cancel View Button Constraint
+            cancelViewButton.heightAnchor.constraint(equalToConstant: 44),
+            cancelViewButton.widthAnchor.constraint(equalToConstant: 167),
+            cancelViewButton.leftAnchor.constraint(equalTo: buttonStackView.leftAnchor, constant: 13),
+            cancelViewButton.centerYAnchor.constraint(equalTo: buttonStackView.centerYAnchor),
+            
+
             //Pay View Button Constraint
-            payViewButton.heightAnchor.constraint(equalToConstant: 45),
-            payViewButton.widthAnchor.constraint(lessThanOrEqualToConstant: 167),
-            payViewButton.topAnchor.constraint(equalTo: lineLabel2.bottomAnchor, constant: 20),
-            payViewButton.leftAnchor.constraint(equalTo: cancelViewButton.rightAnchor, constant: 15),
-            payViewButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -20),
-            payViewButton.rightAnchor.constraint(equalTo: contentView.rightAnchor, constant: -13)
+            payViewButton.heightAnchor.constraint(equalToConstant: 44),
+            payViewButton.widthAnchor.constraint(equalToConstant: 167),
+            payViewButton.rightAnchor.constraint(equalTo: buttonStackView.rightAnchor, constant: -13),
+            payViewButton.centerYAnchor.constraint(equalTo: buttonStackView.centerYAnchor)
             
         ])
     }
@@ -616,7 +711,7 @@ class PlaceOrderViewController: UIViewController {
         
         alertController.addAction(cancelAction)
         
-        self.present(alertController, animated: true, completion: nil)
+        self.present(alertController, animated: false, completion: nil)
     }
     
     fileprivate func loadAnimationView(){
@@ -648,15 +743,15 @@ class PlaceOrderViewController: UIViewController {
     fileprivate func addCreditCardInfo(){
 
         guard let cardNum = cardNumTextField.text else { return }
-        var cardTypeImage = UIImage()
+        var cardTypeImage = String()
         guard let expiryDate = expireyTextField.text else { return }
         guard let securityCode = securityCodeTextField.text else { return }
         
         if let type = CreditCardValidator(cardNum).type {
             if type == CreditCardType.visa {
-                cardTypeImage = UIImage(named: "ViewCard_Icon")!
+                cardTypeImage = "ViewCard_Icon"
             } else if type == CreditCardType.masterCard {
-                cardTypeImage = UIImage(named: "ViewCard_Icon")!
+                cardTypeImage = "ViewCard_Icon"
             }
         }
         
@@ -664,11 +759,13 @@ class PlaceOrderViewController: UIViewController {
         
         if creditCardList.count == 0 {
             creditCardList[cardNum] = cardInfo
+            cardDetailData()
         } else {
             let _ = creditCardList.filter { (value) -> Bool in
                
                 if !value.key.elementsEqual(cardNum){
                     creditCardList[cardNum] = cardInfo
+                    cardDetailData()
                     return true
                 } else {
                     self.showErrorAlert(Message: "That credit card already added to the list.")
@@ -676,12 +773,10 @@ class PlaceOrderViewController: UIViewController {
                 }
             }
         }
-        
+
         DispatchQueue.main.async {
             self.payMethodTable.reloadData()
-            self.payMethodtableHeight.constant = 62.0 + (32 * CGFloat(self.creditCardList.count))
-            self.loadViewIfNeeded()
-            
+            self.setPayTableHeight()
         }
     }
     
@@ -691,8 +786,247 @@ class PlaceOrderViewController: UIViewController {
         expireyTextField.text = ""
         securityCodeTextField.text = ""
     }
+    
+    fileprivate func cardDetailData(){
+        
+        cardTableList.removeAll()
+        
+        for details in creditCardList {
+            cardTableList.append(details.value)
+        }
+        
+        if saveCardSwitch.isOn {
+            let encoder = PropertyListEncoder()
+
+            do {
+                let data = try encoder.encode(creditCardList)
+                try data.write(to: dataFilePath!)
+            } catch {
+                print("Error encoding cart list \(error)")
+            }
+        }
+    }
+    
+    fileprivate func loadTemporyCard(){
+        if let data = try? Data(contentsOf: dataFilePath!){
+            let decode = PropertyListDecoder()
+            
+            do {
+                let getCartList = try decode.decode([String:CreditCard].self, from: data)
+                creditCardList = getCartList
+                
+                for detail in getCartList {
+                    cardTableList.append(detail.value)
+                }
+               
+                self.payMethodTable.reloadData()
+                
+            } catch {
+                print("Error decoding cart list \(error)")
+            }
+        }
+    }
+    
+    fileprivate func setPayTableHeight(){
+        self.payMethodtableHeight.constant = 62.0 + (32 * CGFloat(self.cardTableList.count))
+        self.loadViewIfNeeded()
+    }
+    
+    @objc fileprivate func didSelectPayButton(_ sender : UIButton){
+        
+        PlaceOrderViewController.buttonArray.forEach {
+            $0.isSelected = false
+            $0.setBackgroundImage(UIImage(named: "PayType_Icon"), for: .normal)
+        }
+        
+        sender.isSelected = true
+        sender.setBackgroundImage(UIImage(named: "SelectedPayType_Icon"), for: .normal)
+        
+        let card = cardTableList[sender.tag] as CreditCard
+        payCard = card
+        payType = Payment(id: 2, type: "Creadit Card", status: true, date: "2021-03-27 03:00:00")
+        payStatus = true
+    }
+    
+    fileprivate func setPaymentSummary(){
+        if let btAmount = basketAmount {
+            basketTotal.text = String(btAmount).convertDoubleToCurrency()
+            serviceCharge.text = String(200.00).convertDoubleToCurrency()
+            totalAmount.text = String(btAmount + 200.00).convertDoubleToCurrency()
+         }
+    }
+    
+    fileprivate func determineCurrentLocation(){
+        //locationManager.requestWhenInUseAuthorization()
+        
+        if CLLocationManager.locationServicesEnabled(){
+            setupLocationManager()
+            checkLocationAutherization()
+        }
+    }
+    
+    fileprivate func setupLocationManager(){
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+    }
+    
+    fileprivate func checkLocationAutherization(){
+        switch CLLocationManager.authorizationStatus(){
+        
+        case .notDetermined:
+            locationManager.requestWhenInUseAuthorization()
+            break
+        case .restricted:
+            print("restricted")
+            break
+        case .denied:
+            showLocationErrorAlert(Title: "Location Services Disabled", Message: "Please enable location services for this app.")
+            break
+        case .authorizedAlways:
+            locationManager.requestAlwaysAuthorization()
+            break
+        case .authorizedWhenInUse:
+            mapView.showsUserLocation = true
+            centerViewOnUserLocation()
+            break
+        default:
+            break
+        }
+    }
+    
+    fileprivate func centerViewOnUserLocation(){
+        if let location =  locationManager.location?.coordinate{
+            let coordinateRegion = MKCoordinateRegion(center: location, span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))
+            mapView.setRegion(coordinateRegion, animated: true)
+        }
+    }
+    
+    @IBAction func changeButtonDidPressed(_ sender: Any) {
+        
+        let locationView = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(identifier: "LOCATION_SCREEN") as LocationViewController
+        locationView.modalPresentationStyle = .fullScreen
+        locationView.delegate = self
+        
+        let transition = CATransition()
+        transition.duration = 0.5
+        transition.subtype = .fromBottom
+        transition.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+        
+        self.view.window!.layer.add(transition, forKey: kCATransition)
+        
+        self.present(locationView, animated: false, completion: nil)
+    }
+    
+    fileprivate func showLocationErrorAlert(Title title : String,Message message : String){
+        
+        let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        
+        let settingsButton = UIAlertAction(title: "Settings", style: .default) { (settingsAcction) in
+            if let bundleId = Bundle.main.bundleIdentifier,
+               let url = URL(string: "\(UIApplication.openSettingsURLString)&path=PRIVACY/LOCATION/\(bundleId)") {
+                print(url)
+                    UIApplication.shared.open(url, options: [:], completionHandler: nil)
+            }
+        }
+        
+        let cancelAction = UIAlertAction(title: "Cancel", style: .default) { _ in
+            alertController.dismiss(animated: true, completion: nil)
+        }
+        
+        alertController.addAction(settingsButton)
+        alertController.addAction(cancelAction)
+        
+        OperationQueue.main.addOperation {
+            self.present(alertController, animated: true, completion: nil)
+        }
+    }
+    
+    @IBAction func placeOrderDidPressed(_ sender: Any) {
+        
+        var orderInfo : Order!
+        
+        guard let profile = profileInfo else { return  }
+        if let addressDetails = addressInfo,
+           let basket_Amoiunt = basketAmount{
+            //print("profile \(profile)")
+            orderInfo = Order(id: 0, profile: profile, addressDetails: addressDetails, discount: 0, amount: Int(basket_Amoiunt), status: true, date: "")
+        }
+        
+        if Connectivity.isConnectedToInternet() {
+            orderMV.saveOrderInfo(Order: orderInfo,ProductList: orderList)
+        } else {
+            presentAlertMessage(AlertImage: "InternetConnection_Icon", AlertMessage: "No Internet Connection", ButtonTitle: .relaunch)
+        }
+        
+    }
+    
+    fileprivate func presentAlertMessage(AlertImage image : String, AlertMessage message : String, ButtonTitle title : ButtonType){
+        
+        guard let window = UIApplication.shared.windows.filter({$0.isKeyWindow}).first else { return }
+        
+        showAlertMessage.frame = window.frame
+        
+        showAlertMessage.errorImageView.image = UIImage(named: image)
+        showAlertMessage.errorMessageLabel.text = message
+        showAlertMessage.errorButton.setTitle(title.rawValue, for: .normal)
+        showAlertMessage.errorButton.addTarget(self, action: #selector(alertButtonDidPressed(_:)), for: .touchUpInside)
+        
+        view.addSubview(showAlertMessage)
+    }
+    
+    @objc fileprivate func alertButtonDidPressed(_ sender : UIButton){
+        switch sender.currentTitle {
+        case "Relaunch":
+            UIApplication.shared.suspendApplication()
+            break
+        case "Retry":
+            showAlertMessage.removeFromSuperview()
+            
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.5) {
+                let tabbar: UITabBarController? = (UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "TAB_BAR_SCREEN") as? UITabBarController)
+                
+                let transition = CATransition()
+                transition.duration = 0.7
+                transition.type = .push
+                transition.subtype = .fromRight
+                transition.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+                
+                self.view.window!.layer.add(transition, forKey: kCATransition)
+                
+                guard let window = UIApplication.shared.windows.filter({$0.isKeyWindow}).first else { return }
+                
+                window.rootViewController = tabbar
+            }
+            break
+        default:
+            break
+        }
+    }
+    
+    fileprivate func presentDoneAnimation(){
+        let activityIndicatorView = NVActivityIndicatorView(frame: .zero, type: .orbit, color: UIColor(named: "Intraduction_Background"), padding: 0)
+        
+        activityIndicatorView.translatesAutoresizingMaskIntoConstraints = false
+        
+        view.addSubview(activityIndicatorView)
+        
+        NSLayoutConstraint.activate([
+            activityIndicatorView.widthAnchor.constraint(equalToConstant: 200),
+            activityIndicatorView.heightAnchor.constraint(equalToConstant: 200),
+            activityIndicatorView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            activityIndicatorView.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
+        
+        activityIndicatorView.startAnimating()
+        
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 2){
+            activityIndicatorView.stopAnimating()
+            activityIndicatorView.removeFromSuperview()
+        }
+    }
 }
 
+//MARK:- UITableViewDelegate
 extension PlaceOrderViewController : UITableViewDelegate{
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -702,9 +1036,9 @@ extension PlaceOrderViewController : UITableViewDelegate{
             return CGFloat(62)
         }
     }
-    
 }
 
+//MARK:- UITableViewDataSource
 extension PlaceOrderViewController : UITableViewDataSource{
     
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -713,7 +1047,7 @@ extension PlaceOrderViewController : UITableViewDataSource{
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if section == 0 {
-            return creditCardList.count
+            return cardTableList.count
         } else {
             return 1
         }
@@ -721,19 +1055,29 @@ extension PlaceOrderViewController : UITableViewDataSource{
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if indexPath.section == 0 {
+            
             let defaultCell = payMethodTable.dequeueReusableCell(withIdentifier: "CARD_DETAIL_CELL", for: indexPath) as! CardDetailViewCell
+            
+            defaultCell.cardList = cardTableList[indexPath.row]
+            defaultCell.selectButton.tag = indexPath.row
+            PlaceOrderViewController.buttonArray.append(defaultCell.selectButton)
+            defaultCell.selectButton.addTarget(self, action: #selector(didSelectPayButton), for: .touchUpInside)
             
             return defaultCell
         } else {
             let defaultCell = payMethodTable.dequeueReusableCell(withIdentifier: "DEFAULT_PAY_CELL", for: indexPath) as! CheckoutPayViewCell
+            
+            PlaceOrderViewController.buttonArray.append(contentsOf: [defaultCell.cardPayButton,defaultCell.cashPayButton])
+            
             defaultCell.cashPayButton.addTarget(self, action: #selector(cashButtonDidPressed(_:)), for: .touchUpInside)
             defaultCell.cardPayButton.addTarget(self, action: #selector(cardButtonDidPressed(_:)), for: .touchUpInside)
+        
             return defaultCell
         }
     }
-    
 }
 
+//MARK:- UITextFieldDelegate
 extension PlaceOrderViewController : UITextFieldDelegate {
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
@@ -756,4 +1100,155 @@ extension PlaceOrderViewController : UITextFieldDelegate {
         }
     }
     
+}
+
+//MARK:- CLLocationManagerDelegate
+extension PlaceOrderViewController : CLLocationManagerDelegate {
+    
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        let userLocation : CLLocation = locations[0] as CLLocation
+        //stop updating location
+        manager.stopUpdatingLocation()
+
+        let center = CLLocationCoordinate2D(latitude: userLocation.coordinate.latitude, longitude: userLocation.coordinate.longitude)
+        let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))
+        mapView.setRegion(region, animated: true)
+
+        myAnnotation.coordinate = CLLocationCoordinate2DMake(userLocation.coordinate.latitude, userLocation.coordinate.longitude)
+        mapView.addAnnotation(myAnnotation)
+        
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        checkLocationAutherization()
+    }
+}
+
+//MARK:- MKMapViewDelegate
+extension PlaceOrderViewController : MKMapViewDelegate {
+    
+    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+        if !(annotation is MKPointAnnotation) {
+            return nil
+        }
+        
+        let annotationIdentifier = "AnnotationIdentifier"
+        var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: annotationIdentifier)
+        
+        if annotationView == nil {
+            annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: annotationIdentifier)
+            annotationView!.canShowCallout = true
+            
+        }
+        else {
+            annotationView!.annotation = annotation
+        }
+        
+        let pinImage = UIImage(named: "Location_Icon")
+        annotationView!.image = pinImage
+        return annotationView
+    }
+}
+
+//MARK:- CustomLocationDelegate
+extension PlaceOrderViewController : CustomLocationDelegate {
+    func setCustomLocation(_ coordinate: CLLocationCoordinate2D) {
+
+        mapView.removeAnnotations(mapView.annotations)
+        let center = CLLocationCoordinate2D(latitude: coordinate.latitude, longitude: coordinate.longitude)
+        let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))
+        mapView.setRegion(region, animated: true)
+        
+        let pointAnnotation = MKPointAnnotation()
+        pointAnnotation.coordinate = coordinate
+        mapView.addAnnotation(pointAnnotation)
+    }
+}
+
+//MARK:- RegistrationDelegate
+extension PlaceOrderViewController : RegistrationDelegate {
+    func getResponse(_ response: ApiResponse) { }
+    
+    func getUniqueFieldResult(_ field: String, _ result: Bool) { }
+    
+    func getProfileInfo(_ profile: Profile?) {
+        if let details = profile,let id = details.id {
+            self.profileInfo = details
+            addressMV.getBillingAddressInfo(ProfileId: id)
+        }
+    }
+}
+
+//MARK:- AddressDelegate
+extension PlaceOrderViewController : AddressDelegate {
+    func showCustomAlertMessage(HttpCode code: Int) { }
+    
+    func getBillingAddressInfo(BillingAddress details: AddressDetail) {
+        nameLabel.text = "\(details.firstName!) \(details.lastName!)"
+        mobileLabel.text = "Mobile No :- \(details.mobile!)"
+        var address : String = ""
+        if !details.apartmentNo!.isEmpty{
+            address = "\(details.apartmentNo!) \n"
+        }
+        address += "\(details.houseNo!) \n"
+        address += "\(details.city!) \n"
+        address += details.postalCode!
+        addressLabel.text = address
+        
+        if let latitude = details.latitude,let longitude = details.longitude{
+            
+            mapView.removeAnnotations(mapView.annotations)
+            
+            let center = CLLocationCoordinate2D(latitude: Double(latitude)!, longitude: Double(longitude)!)
+            let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))
+            mapView.setRegion(region, animated: true)
+            
+            let pointAnnotation = MKPointAnnotation()
+            pointAnnotation.coordinate = center
+            mapView.addAnnotation(pointAnnotation)
+        }
+        
+        self.addressInfo = details
+    }
+}
+
+//MARK:- OrderDelegate
+extension PlaceOrderViewController : OrderDelegate{
+    
+    func getOrderInfo(Order info: Order) {
+
+        paymentInfoList.removeAll()
+        
+        
+        print(payCard)
+        
+        let currentDate = Date()
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        let formatDate = formatter.string(from: currentDate)
+        
+        let details = PaymentDetails(id: 0, order: info, payment: payType, payAmount: (info.amount + 200), date: formatDate, creaditCard: payCard, status: payStatus)
+        paymentInfoList.append(details)
+        
+        paymentMV.saveOrderPayment(paymentDetails: paymentInfoList)
+    }
+    
+    func showResponseCode(HttpCode code: Int) {
+        switch HttpStatus(rawValue: code) {
+        case .created:
+            presentDoneAnimation()
+            break
+            
+        case .internalServerError:
+            presentAlertMessage(AlertImage: "ServerError_Image", AlertMessage: "Server Error..! \n You order was unsuccessfully saved.", ButtonTitle: .retry)
+            break
+        case .badRequest:
+            presentAlertMessage(AlertImage: "ServerError_Image", AlertMessage: "Server Error..! \n You order was unsuccessfully saved.", ButtonTitle: .retry)
+            break
+        case .notFound:
+            break
+        case .none:
+            break
+        }
+    }
 }

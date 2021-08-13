@@ -30,6 +30,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             
             navigationController.setNavigationBarHidden(true, animated: false)
             
+            let transition = CATransition()
+            transition.duration = 0.7
+            transition.type = .moveIn
+            transition.subtype = .fromLeft
+            transition.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+            window?.layer.add(transition, forKey: kCATransition)
+            
             window?.rootViewController = navigationController
             
         } else {

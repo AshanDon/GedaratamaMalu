@@ -434,19 +434,16 @@ class RegisterViewController: UIViewController {
                let userName = userNameField.text,
                let password = passwordField.text {
                 
-                let dateFormatter = DateFormatter()
-                dateFormatter.dateFormat = "yyyy-MM-dd"
-                let date = dateFormatter.date(from:"2021-04-05")
-                
-                let profileType = ProfileType(id: 5, type: "Administrator", status: true, date: date!)
+                let profileType = ProfileType(id: 5, type: "Administrator", status: true, date: "2021-04-05T00:00:00.000+00:00")
                 
                 guard let code = countryCodeField.text else { return }
                 var mobileCode : String {
                     return "\(code) \(mobile)"
                 }
-                print(mobileCode)
-                let profile = Profile(first_Name: firstName, last_Name: lastName, mobile: mobileCode, email: email, userName: userName, password: password, status: true, date: Date().getFormattedDate(), profileType: profileType)
+                print(Date().getFormattedDate())
+                let profile = Profile(id:0,firstName: firstName, lastName: lastName, mobile: mobileCode, email: email, userName: userName, password: password, status: true, date: "", profileType: profileType)
                 
+                print(profile)
                 presentVerificationVC(profile)
                 otpMV.generateOTP(userName)
             }
@@ -583,7 +580,10 @@ class RegisterViewController: UIViewController {
     
     fileprivate func getDefaultJWTToken() {
         let userDefault = UserDefaults.standard
-        self.jwt_Token = userDefault.object(forKey: "JWT_TOKEN") as! String
+        guard let token = userDefault.object(forKey: "JWT_TOKEN") as? String else {
+            return
+        }
+        self.jwt_Token = token
     }
     
     
@@ -596,6 +596,8 @@ class RegisterViewController: UIViewController {
         verificationVC.modalTransitionStyle = .crossDissolve
         
         verificationVC.profile = profile
+        
+        verificationVC.delegate = self
         
         self.present(verificationVC, animated: true, completion: nil)
     }
@@ -710,6 +712,9 @@ extension RegisterViewController : UITextFieldDelegate {
 }
 
 extension RegisterViewController : RegistrationDelegate {
+    
+    func getProfileInfo(_ profile: Profile?) { }
+    
     func getUniqueFieldResult(_ field: String, _ result: Bool) {
         switch field {
         case "email":
@@ -744,5 +749,20 @@ extension RegisterViewController : RegistrationDelegate {
 extension RegisterViewController : UIPopoverPresentationControllerDelegate{
     func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {
         return .none
+    }
+}
+
+extension RegisterViewController : MobileVerifyDelegate {
+    
+    func clearRegistrationFields() {
+        firstNameField.text = nil
+        lastNameField.text = nil
+        countryCodeField.text = nil
+        contactField.text = nil
+        emailField.text = nil
+        userNameField.text = nil
+        passwordField.text = nil
+        rePasswordField.text = nil
+        countryCode = nil
     }
 }

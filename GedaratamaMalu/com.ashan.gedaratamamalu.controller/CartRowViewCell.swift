@@ -17,12 +17,14 @@ class CartRowViewCell: UITableViewCell {
     @IBOutlet weak var minusButton: UIButton!
     @IBOutlet weak var priceLabel: UILabel!
     
+    fileprivate var productMV : ProductViewModel!
+    
     var getRowDetail : Product! {
         
         didSet{
             guard let details = getRowDetail else { return }
             
-            self.productImageView.image = UIImage(named: "Fish 1")
+            self.productMV.getProductImage(ProductCode: details.id!)
             self.productNameLabel.text = details.name!
             self.unitPriceLabel.text =  "\(String(details.unitprice!).convertDoubleToCurrency()) per Kg"
             let qty = details.qty ?? 0
@@ -41,6 +43,14 @@ class CartRowViewCell: UITableViewCell {
     
     override func awakeFromNib() {
         super.awakeFromNib()
-        // Initialization code
+        
+        productMV = ProductViewModel(UserDefaults.standard.object(forKey: "JWT_TOKEN") as! String)
+        productMV.delegate = self
+    }
+}
+
+extension CartRowViewCell : ProductDelegate {
+    func getProductImage(_ imageData: NSData) {
+        self.productImageView.image = UIImage(data: imageData as Data)
     }
 }

@@ -9,9 +9,8 @@ import Foundation
 import Alamofire
 
 @objc protocol AuthenticationDelegate {
-    
-    @objc optional func getJwtToken(token : String)
     @objc optional func getSignInError(_ message : String)
+    @objc optional func getTokenInfo(_ token : String,_ userName : String,_ password : String)
 }
 
 class AuthenticationViewModel {
@@ -28,16 +27,16 @@ class AuthenticationViewModel {
         return headers
     }
     
-    public func getDefaultJwtWebToken(){
-
-        let auth = Authentication(userName: "AshanDon", password: "ashan123")
-        
-        AF.request("\(baseURL)/authenticate",method: .post,parameters: auth,encoder: JSONParameterEncoder.default,headers: getHttpHeaders(), interceptor: nil,requestModifier: nil).responseDecodable(of: JwtToken.self) { response in
-            if let getData = response.value {
-                self.authDelegate.getJwtToken!(token: getData.jwt)
-            }
-        }.resume()
-    }
+//    public func getDefaultJwtWebToken(){
+//
+//        let auth = Authentication(userName: "AshanDon", password: "ashan123")
+//        
+//        AF.request("\(baseURL)/authenticate",method: .post,parameters: auth,encoder: JSONParameterEncoder.default,headers: getHttpHeaders(), interceptor: nil,requestModifier: nil).responseDecodable(of: JwtToken.self) { response in
+//            if let getData = response.value {
+//                self.authDelegate.getJwtToken!(token: getData.jwt)
+//            }
+//        }.resume()
+//    }
     
     public func getUserProfile(_ userName : String, _ password : String){
         
@@ -48,9 +47,9 @@ class AuthenticationViewModel {
             guard let strongeSelf = self else { return }
             
             if let value = response.value {
-                strongeSelf.authDelegate.getJwtToken!(token: value.jwt)
+                strongeSelf.authDelegate.getTokenInfo?(value.jwt, value.userName,value.password)
             } else {
-                strongeSelf.authDelegate.getSignInError!("Incorret user name or password")
+                strongeSelf.authDelegate.getSignInError!("Invalid user name or password")
             }
             
         }.resume()

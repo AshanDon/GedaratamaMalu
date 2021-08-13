@@ -1,0 +1,5 @@
+${PODS_ROOT}/Target Support Files/Pods-GedaratamaMalu-GedaratamaMaluUITests/Pods-GedaratamaMalu-GedaratamaMaluUITests-frameworks.sh
+${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework
+${BUILT_PRODUCTS_DIR}/CreditCardValidator/CreditCardValidator.framework
+${BUILT_PRODUCTS_DIR}/MonthYearPicker/MonthYearPicker.framework
+${BUILT_PRODUCTS_DIR}/NVActivityIndicatorView/NVActivityIndicatorView.framework

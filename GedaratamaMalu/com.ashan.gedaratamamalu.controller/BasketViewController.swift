@@ -17,12 +17,26 @@ class BasketViewController: UIViewController {
     @IBOutlet weak var specialRequestView : UIView!
     @IBOutlet weak var noteTextView : UITextView!
     @IBOutlet weak var scrollView : UIScrollView!
+    @IBOutlet weak var basketTotalLabel: UILabel!
+    @IBOutlet weak var serviceChargeLabel: UILabel!
+    @IBOutlet weak var totalAmountLabel: UILabel!
+    @IBOutlet weak var paymentSummaryView: UIView!
     
     @IBOutlet weak var cartTableHeightConstraint: NSLayoutConstraint!
     
     fileprivate let basketCellHeight : CGFloat = 96.0
+    fileprivate var basketTotal : Double? = Double()
     
-    public var cartList : [Product] = [Product]()
+    public var cartList : [Product]! {
+        
+        didSet{
+            guard let list = cartList else { return }
+    
+            for product in list {
+                basketTotal? += product.unitprice! * Double(product.qty!)
+            }
+        }
+    }
     
     fileprivate lazy var backButton : UIButton = {
         let button = UIButton(frame: CGRect(x: 0, y: 0, width: 0, height: 44))
@@ -54,6 +68,10 @@ class BasketViewController: UIViewController {
         self.loadViewIfNeeded()
         
         scrollView.isScrollEnabled = true
+        
+        setupPaymentSummery()
+        
+        noteTextView.delegate = self
 
     }
     
@@ -145,6 +163,7 @@ class BasketViewController: UIViewController {
             transition.type = .push
             transition.subtype = .fromRight
             transition.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+            
             self.view.window!.layer.add(transition, forKey: kCATransition)
             
             guard let window = UIApplication.shared.windows.filter({$0.isKeyWindow}).first else { return }
@@ -154,29 +173,13 @@ class BasketViewController: UIViewController {
     }
     
     @objc fileprivate func keyboardWillShow(_ notification : Notification){
-        
         view.addSubview(touchView)
-        
-        guard let keyboardFrame = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue else { return }
-        
-        print(keyboardFrame.height)
-
-        let edgeInsets = UIEdgeInsets(top: 0.0, left: 0.0, bottom: keyboardFrame.height , right: 0.0)
-        
-        scrollView.contentInset = edgeInsets
-        
-        scrollView.scrollIndicatorInsets = edgeInsets
     }
     
     @objc fileprivate func keyboardWillHide(_ notification : Notification){
         
         touchView.removeFromSuperview()
         
-        let edgeInsets = UIEdgeInsets(top: 0.0, left: 0.0, bottom: 0.0 , right: 0.0)
-        
-        scrollView.contentInset = edgeInsets
-        
-        scrollView.scrollIndicatorInsets = edgeInsets
     }
     
     @objc fileprivate func dismissKeyBoard(){
@@ -187,6 +190,7 @@ class BasketViewController: UIViewController {
         let placerOrderView = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(identifier: "PLACE_ORDER") as! PlaceOrderViewController
         
         placerOrderView.modalPresentationStyle = .fullScreen
+        placerOrderView.orderList = cartList
         
         let transition = CATransition()
         transition.duration = 0.5
@@ -201,6 +205,14 @@ class BasketViewController: UIViewController {
         present(placerOrderView, animated: false, completion: nil)
     }
     
+    fileprivate func setupPaymentSummery(){
+        if let basketTotal = basketTotal{
+            self.basketTotalLabel.text! = String(basketTotal).convertDoubleToCurrency()
+            self.serviceChargeLabel.text! = String(200.00).convertDoubleToCurrency()
+            self.totalAmountLabel.text! = String(basketTotal + 200.00).convertDoubleToCurrency()
+        }
+        
+    }
 }
 
 extension BasketViewController : UITableViewDelegate {
@@ -222,7 +234,21 @@ extension BasketViewController : UITableViewDataSource {
         cell.getProduct = cartList[indexPath.row]
         return cell
     }
+}
+
+extension BasketViewController : UITextViewDelegate {
     
+    func textViewDidBeginEditing(_ textView: UITextView) {
+        if textView.textColor == UIColor(named: "Line_Color"){
+            textView.text = ""
+            textView.textColor = UIColor(named: "Black_Color")!
+        }
+    }
     
-    
+    func textViewDidEndEditing(_ textView: UITextView) {
+        if textView.text.isEmpty {
+            textView.textColor = UIColor(named: "Line_Color")
+            textView.text = "Anything else we need to know?"
+        }
+    }
 }
