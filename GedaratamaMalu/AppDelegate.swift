@@ -10,11 +10,7 @@ import UIKit
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-    let authModelView = AuthenticationViewModel()
-
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        authModelView.authDelegate = self
-        authModelView.getDefaultJwtWebToken()
         return true
     }
 
@@ -31,16 +27,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // If any sessions were discarded while the application was not running, this will be called shortly after application:didFinishLaunchingWithOptions.
         // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
     }
-}
-
-extension AppDelegate : AuthenticationDelegate{
-    
-    func getJwtToken(token: String) {
-        let userDefault = UserDefaults.standard
-        userDefault.set(token, forKey: "JWT_TOKEN")
-    }
-    
-    
 }
 
 
