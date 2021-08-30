@@ -8,12 +8,18 @@
 import Foundation
 import Alamofire
 
+protocol PaymentDelegate {
+    func getPaymentDetails(_ info : [PaymentDetails])
+}
+
 class PaymentModelView {
     
     fileprivate var jwtToken : String!
     fileprivate let baseURL : String = "http://192.168.0.182:8080/malukade/v1"
     
-    var delegate : OrderDelegate!
+    var orderDelegate : OrderDelegate!
+    var paymentDelegate : PaymentDelegate!
+    
     
     init(JwtToken token : String) {
         self.jwtToken = token
@@ -56,8 +62,45 @@ class PaymentModelView {
             }
             
             if let res = response.response {
-                strongeSelf.delegate.showResponseCode(HttpCode: res.statusCode)
+                strongeSelf.orderDelegate.showResponseCode(HttpCode: res.statusCode)
             }
         }
+    }
+    
+    func getPaymentTypeByOrderId(OrderId id : Int){
+        
+        var url : String {
+            return "\(baseURL)/payment_details/all"
+        }
+        
+        let parametar : Parameters = [
+            "order_id" : id
+        ]
+        
+        guard let urlString = URL(string: url) else { return }
+        
+        
+        AF.request(urlString,
+                   method: .get,
+                   parameters: parametar,
+                   encoding: URLEncoding.queryString,
+                   headers: httpHeaders)
+            .responseJSON { [weak self] (resJson) in
+                
+                guard let strongeSelf = self else { return }
+                
+                if let error = resJson.error {
+                    print("Error :- \(error.localizedDescription)")
+                }
+                
+                guard let data = resJson.data else { return }
+                
+                do{
+                    let paymentDetails = try JSONDecoder().decode([PaymentDetails].self, from: data)
+                    strongeSelf.paymentDelegate.getPaymentDetails(paymentDetails)
+                } catch let serializationExp {
+                    print(serializationExp.localizedDescription)
+                }
+            }.resume()
     }
 }

@@ -205,7 +205,7 @@ class AddressViewController: UIViewController {
                 
                 guard let coordinate = billingAddresVC.selectedCoordinate else { return }
                 
-                let addressType = AddressType(id: 1, type: "Billing", status: true, date: Date().getFormattedDate())
+                let addressType = AddressType(id: 141, type: "Billing", status: true, date: Date().getFormattedDate())
                 
                 let addressDetails = AddressDetail(id: 0, addressType: addressType, profile: profileInfo, firstName: firstName, lastName: lastName, houseNo: houseNo, apartmentNo: apartmentNo, city: town, postalCode: postalCode, latitude: String(coordinate.latitude), longitude: String(coordinate.longitude), mobile: phone, email: email)
                 

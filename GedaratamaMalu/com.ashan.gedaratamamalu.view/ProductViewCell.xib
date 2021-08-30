@@ -21,7 +21,7 @@
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="5JI-nh-tMZ" userLabel="Background View">
                         <rect key="frame" x="0.0" y="0.0" width="180" height="290"/>
                         <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Fish 1" translatesAutoresizingMaskIntoConstraints="NO" id="OAF-EP-HhE" userLabel="Product Image">
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="OAF-EP-HhE" userLabel="Product Image">
                                 <rect key="frame" x="0.0" y="0.0" width="180" height="165"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="165" id="LXD-A7-BrB"/>
@@ -103,12 +103,11 @@
                 <outlet property="productNameLabel" destination="iY1-g1-3Ee" id="nXT-lm-l7R"/>
                 <outlet property="prouuctPrice" destination="Sap-Rw-6J3" id="Lfv-y6-A0h"/>
             </connections>
-            <point key="canvasLocation" x="140.57971014492756" y="133.92857142857142"/>
+            <point key="canvasLocation" x="-26.086956521739133" y="-53.571428571428569"/>
         </collectionViewCell>
     </objects>
     <resources>
         <image name="AddToCart_Button_Icon" width="32" height="28"/>
-        <image name="Fish 1" width="1000" height="1000"/>
         <namedColor name="Black_Color">
             <color red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>

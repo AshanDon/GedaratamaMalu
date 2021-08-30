@@ -8,29 +8,29 @@
 import Foundation
 
 struct Payment : Codable{
-    let id: Int?
-    let type: String?
-    let status: Bool?
-    let date : String?
+    let id: Int
+    let paymentType: String
+    let status: Bool
+    let date : String
     
     init(id : Int,type : String,status : Bool,date : String) {
         self.id = id
-        self.type = type
+        self.paymentType = type
         self.status = status
         self.date = date
     }
     
     enum CodingKeys : String,CodingKey {
         case id = "id"
-        case type = "payment_Type"
-        case status = "active_Status"
-        case date = "c_Date"
+        case paymentType = "paymentType"
+        case status = "status"
+        case date = "date"
     }
     
     init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         id = try values.decode(Int.self, forKey: .id)
-        type = try values.decode(String.self, forKey: .type)
+        paymentType = try values.decode(String.self, forKey: .paymentType)
         status = try values.decode(Bool.self, forKey: .status)
         date = try values.decode(String.self, forKey: .date)
     }

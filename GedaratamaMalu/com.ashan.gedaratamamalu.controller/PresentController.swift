@@ -44,7 +44,7 @@ class PresentController {
     public func presentTabBarVC() -> UIViewController{
         
         let tabarVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(identifier: "TAB_BAR_SCREEN") as TabBarViewController
-        
+
         tabarVC.modalPresentationStyle = .fullScreen
         
         return tabarVC

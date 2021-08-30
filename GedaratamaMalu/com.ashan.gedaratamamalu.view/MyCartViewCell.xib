@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina5_5" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="MyCartCell" rowHeight="24" id="KGk-i7-Jjw" customClass="MyCartViewCell" customModule="GedaratamaMalu" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="303" height="24"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
+                <rect key="frame" x="0.0" y="0.0" width="303" height="24"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="hzg-FF-1ud">
+                        <rect key="frame" x="0.0" y="0.0" width="303" height="24"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="1 Kg" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7Le-Pu-0Kk" userLabel="Product Qty Label">
+                                <rect key="frame" x="0.0" y="0.0" width="42" height="24"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="42" id="6sw-Oz-3gH"/>
+                                    <constraint firstAttribute="height" constant="24" id="idU-DV-laE"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" name="SinhalaSangamMN" family="Sinhala Sangam MN" pointSize="18"/>
+                                <color key="textColor" name="Black_Color"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" text="Prawns(Jumbo)" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KAY-sq-odQ" userLabel="Product Name Label">
+                                <rect key="frame" x="72" y="0.0" width="231" height="24"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="24" id="hxO-Xm-WhX"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" name="SinhalaSangamMN" family="Sinhala Sangam MN" pointSize="18"/>
+                                <color key="textColor" name="Black_Color"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstAttribute="trailing" secondItem="KAY-sq-odQ" secondAttribute="trailing" id="DN2-1w-TzD"/>
+                            <constraint firstAttribute="bottom" secondItem="KAY-sq-odQ" secondAttribute="bottom" id="EnA-c0-CnI"/>
+                            <constraint firstItem="KAY-sq-odQ" firstAttribute="leading" relation="lessThanOrEqual" secondItem="7Le-Pu-0Kk" secondAttribute="trailing" constant="30" id="MKu-7d-dKD"/>
+                            <constraint firstItem="7Le-Pu-0Kk" firstAttribute="top" secondItem="hzg-FF-1ud" secondAttribute="top" id="N6Z-C8-Rdm"/>
+                            <constraint firstItem="KAY-sq-odQ" firstAttribute="top" secondItem="hzg-FF-1ud" secondAttribute="top" id="goe-67-S0M"/>
+                            <constraint firstAttribute="bottom" secondItem="7Le-Pu-0Kk" secondAttribute="bottom" id="kqT-Hy-7ly"/>
+                            <constraint firstItem="7Le-Pu-0Kk" firstAttribute="leading" secondItem="hzg-FF-1ud" secondAttribute="leading" id="lii-85-Aph"/>
+                        </constraints>
+                    </view>
+                </subviews>
+                <constraints>
+                    <constraint firstItem="hzg-FF-1ud" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="5Oh-hd-txq"/>
+                    <constraint firstAttribute="bottom" secondItem="hzg-FF-1ud" secondAttribute="bottom" id="F6Q-Rz-HFJ"/>
+                    <constraint firstAttribute="trailing" secondItem="hzg-FF-1ud" secondAttribute="trailing" id="UDX-CX-myN"/>
+                    <constraint firstItem="hzg-FF-1ud" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="XgC-Ku-Kqo"/>
+                </constraints>
+            </tableViewCellContentView>
+            <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
+            <connections>
+                <outlet property="orderOtyLabel" destination="7Le-Pu-0Kk" id="vVn-0O-PxU"/>
+                <outlet property="productNameLabel" destination="KAY-sq-odQ" id="5jB-M2-sRt"/>
+            </connections>
+            <point key="canvasLocation" x="141" y="134"/>
+        </tableViewCell>
+    </objects>
+    <resources>
+        <namedColor name="Black_Color">
+            <color red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>

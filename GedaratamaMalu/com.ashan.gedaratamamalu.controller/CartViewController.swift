@@ -34,9 +34,9 @@ class CartViewController: UIViewController {
     
     
     fileprivate var cartList : [Product] = [Product]()
-    fileprivate var dataFilePath = FileManager.default.urls(for: .documentDirectory, in:.userDomainMask).first?.appendingPathComponent("TemparyCartList.plist")
     fileprivate var productVM : ProductViewModel!
     fileprivate var getAvailableStock : Int = 0
+    fileprivate let userDefault : UserDefaults = UserDefaults.standard
     
     public weak var delegate : CartListDelegate?
     public var setCartList : [Product]!{
@@ -175,13 +175,12 @@ class CartViewController: UIViewController {
     
     @objc fileprivate func temporyAddCartList(){
         
-        let encode = PropertyListEncoder()
-        do {
-            let encodeList = try encode.encode(cartList)
-            try encodeList.write(to: dataFilePath!)
-        } catch {
-            setupBlackView(AlertType: .ApplicationError)
-        }
+//        let temporyList = userDefault.value(forKey: "TEMPORY_CART_LIST") as! [Int:Product]
+//
+//        for (_,product) in temporyList {
+//            cartList.append(product)
+//        }
+        
     }
     
     @objc private func updateProductRow(_ sender : UIButton){

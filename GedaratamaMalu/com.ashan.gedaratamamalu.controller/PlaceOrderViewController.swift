@@ -36,7 +36,7 @@ class PlaceOrderViewController: UIViewController {
     fileprivate var creditCardList : [String:CreditCard] = [String:CreditCard]()
     fileprivate var cardTableList : [CreditCard] = [CreditCard]()
     fileprivate var paymentInfoList : [PaymentDetails] = [PaymentDetails]()
-    fileprivate var dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("TemparyCardList.plist")
+    fileprivate var cardDataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("TemparyCardList.plist")
     fileprivate var basketAmount : Double? = Double()
     fileprivate var myAnnotation : MKPointAnnotation = MKPointAnnotation()
     fileprivate let locationManager = CLLocationManager()
@@ -48,8 +48,9 @@ class PlaceOrderViewController: UIViewController {
     fileprivate var addressInfo : AddressDetail!
     fileprivate let showAlertMessage = ShowCustomAlertMessage()
     fileprivate var payCard : CreditCard = CreditCard(cardNumber: "", cardTypeImage: "", expiryDate: "", securityCode: "")
-    fileprivate var payType : Payment = Payment(id: 1, type: "Cash", status: true, date: "2021-03-27 03:00:00")
+    fileprivate var payType : Payment = Payment(id: 1, type: "Cash", status: true, date: "2021-03-27")
     fileprivate var payStatus : Bool = false
+    fileprivate var orderID : Int = 0
     
     static var buttonArray : [UIButton] = [UIButton]()
     
@@ -371,7 +372,7 @@ class PlaceOrderViewController: UIViewController {
         registerMV.delegate = self
         addressMV.delegate = self
         orderMV.delegate = self
-        paymentMV.delegate = self
+        paymentMV.orderDelegate = self
         scrollView.delegate = self
         
         registerMV.getProfileInfoByUserName(UserName: userName)
@@ -474,7 +475,7 @@ class PlaceOrderViewController: UIViewController {
     
     @objc fileprivate func cashButtonDidPressed(_ : UIButton){
         payCard = CreditCard(cardNumber: "", cardTypeImage: "", expiryDate: "", securityCode: "")
-        payType = Payment(id: 1, type: "Cash", status: true, date: "2021-03-27 03:00:00")
+        payType = Payment(id: 1, type: "Cash", status: true, date: "2021-03-27")
         payStatus = false
     }
     
@@ -800,7 +801,7 @@ class PlaceOrderViewController: UIViewController {
 
             do {
                 let data = try encoder.encode(creditCardList)
-                try data.write(to: dataFilePath!)
+                try data.write(to: cardDataFilePath!)
             } catch {
                 print("Error encoding cart list \(error)")
             }
@@ -808,7 +809,7 @@ class PlaceOrderViewController: UIViewController {
     }
     
     fileprivate func loadTemporyCard(){
-        if let data = try? Data(contentsOf: dataFilePath!){
+        if let data = try? Data(contentsOf: cardDataFilePath!){
             let decode = PropertyListDecoder()
             
             do {
@@ -844,7 +845,7 @@ class PlaceOrderViewController: UIViewController {
         
         let card = cardTableList[sender.tag] as CreditCard
         payCard = card
-        payType = Payment(id: 2, type: "Creadit Card", status: true, date: "2021-03-27 03:00:00")
+        payType = Payment(id: 2, type: "Creadit Card", status: true, date: "2021-03-27")
         payStatus = true
     }
     
@@ -924,7 +925,6 @@ class PlaceOrderViewController: UIViewController {
         let settingsButton = UIAlertAction(title: "Settings", style: .default) { (settingsAcction) in
             if let bundleId = Bundle.main.bundleIdentifier,
                let url = URL(string: "\(UIApplication.openSettingsURLString)&path=PRIVACY/LOCATION/\(bundleId)") {
-                print(url)
                     UIApplication.shared.open(url, options: [:], completionHandler: nil)
             }
         }
@@ -948,8 +948,7 @@ class PlaceOrderViewController: UIViewController {
         guard let profile = profileInfo else { return  }
         if let addressDetails = addressInfo,
            let basket_Amoiunt = basketAmount{
-            //print("profile \(profile)")
-            orderInfo = Order(id: 0, profile: profile, addressDetails: addressDetails, discount: 0, amount: Int(basket_Amoiunt), status: true, date: "")
+            orderInfo = Order(id: 0, profile: profile, addressDetails: addressDetails, discount: 0, amount: Int(basket_Amoiunt), status: true, date: Date().getFormattedDateString())
         }
         
         if Connectivity.isConnectedToInternet() {
@@ -1021,8 +1020,22 @@ class PlaceOrderViewController: UIViewController {
         
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 2){
             activityIndicatorView.stopAnimating()
+            self.presentOrderComfirmationView()
             activityIndicatorView.removeFromSuperview()
         }
+    }
+    
+    func presentOrderComfirmationView(){
+        let confirmationVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(identifier: "ORDER_CONFIRMATION") as OrderConfirmationViewController
+        confirmationVC.modalPresentationStyle = .fullScreen
+        confirmationVC.orderId = orderID
+        self.present(confirmationVC, animated: true, completion: nil)
+    }
+    
+    fileprivate func clearTemparyCartList(){
+       
+        NotificationCenter.default.post(name: Notification.Name("CLEAR_CART_LIST"), object: nil)
+        
     }
 }
 
@@ -1214,13 +1227,18 @@ extension PlaceOrderViewController : AddressDelegate {
 
 //MARK:- OrderDelegate
 extension PlaceOrderViewController : OrderDelegate{
+    func updateActiveStatus(Updated result: Bool) { }
+    
+    func getAllPendingOrders(List list: [Order]) { }
+    
+    func getOrderDetailInfo(OrderDetails list: [OrderDetails]) {}
+    
     
     func getOrderInfo(Order info: Order) {
 
         paymentInfoList.removeAll()
         
-        
-        print(payCard)
+        orderID = info.id
         
         let currentDate = Date()
         let formatter = DateFormatter()
@@ -1236,6 +1254,7 @@ extension PlaceOrderViewController : OrderDelegate{
     func showResponseCode(HttpCode code: Int) {
         switch HttpStatus(rawValue: code) {
         case .created:
+            clearTemparyCartList()
             presentDoneAnimation()
             break
             

@@ -7,15 +7,12 @@
 
 import Foundation
 
-struct OrderDetail : Codable {
-    var id : Int?
-    var discount : Double?
-    var qty : Double?
-    var unitPrice : Double?
-    var order : Order?
-    var product : Product?
+struct OrderDetails : Codable {
+    let id, discount, qty, unitPrice: Int?
+    let order: Order?
+    let product: Product?
     
-    init(id : Int, discount : Double, qty : Double, unitPrice : Double, order : Order, product : Product) {
+    init(id : Int, discount : Int, qty : Int, unitPrice : Int, order : Order, product : Product) {
         self.id = id
         self.discount = discount
         self.qty = qty
@@ -36,9 +33,9 @@ struct OrderDetail : Codable {
     init(from decoder: Decoder) throws {
         let value = try decoder.container(keyedBy: CodingKeys.self)
         id = try value.decodeIfPresent(Int.self, forKey: .id)
-        discount = try value.decodeIfPresent(Double.self, forKey: .discount)
-        qty = try value.decodeIfPresent(Double.self, forKey: .qty)
-        unitPrice = try value.decodeIfPresent(Double.self, forKey: .unitPrice)
+        discount = try value.decodeIfPresent(Int.self, forKey: .discount)
+        qty = try value.decodeIfPresent(Int.self, forKey: .qty)
+        unitPrice = try value.decodeIfPresent(Int.self, forKey: .unitPrice)
         order = try Order(from: decoder)
         product = try Product(from: decoder)
     }

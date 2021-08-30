@@ -25,13 +25,19 @@ class HomeViewController: UIViewController {
     
     fileprivate var productList : [Product] = [Product]()
     fileprivate var cartList : [Int:Product] = [Int:Product]()
+    fileprivate var pendingOrderList : [Order] = [Order]()
     
     fileprivate var notifiMoveUpAnimation : UIViewPropertyAnimator!
-    fileprivate var dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("TemparyCartList.plist")
-    
     fileprivate var productVM : ProductViewModel!
     fileprivate var refreshController : UIRefreshControl!
     fileprivate var activityIndicatorView : NVActivityIndicatorView!
+    fileprivate var clickIndicatorView : NVActivityIndicatorView!
+    fileprivate var willAppearIndicatorView : NVActivityIndicatorView!
+    fileprivate let userDefaults : UserDefaults = UserDefaults.standard
+    fileprivate var orderVM : OrderModelView!
+    fileprivate var registerVM : RegisterModelView!
+    fileprivate var profile_Id : Int = Int()
+    
     
     
     fileprivate lazy var touchView : UIView = {
@@ -100,23 +106,31 @@ class HomeViewController: UIViewController {
         modifiyViewComponent()
         
         self.productView.register(UINib(nibName: "ProductViewCell", bundle: nil), forCellWithReuseIdentifier: "PRODUCT_CELL")
+        self.productView.register(UINib(nibName: "OrderConfirmationViewCell", bundle: nil), forCellWithReuseIdentifier: "ORDER_SUMMERY")
         
         productView.delegate = self
         
         productView.dataSource = self
         
-        let jwt_Key = UserDefaults.standard.object(forKey: "JWT_TOKEN") as! String
+        let jwt_Key = userDefaults.object(forKey: "JWT_TOKEN") as! String
         
         productVM = ProductViewModel(jwt_Key)
         productVM.delegate = self
         
-        loadProductList()
+        orderVM = OrderModelView(JwtToken: jwt_Key)
+        orderVM.delegate = self
+        
+        registerVM = RegisterModelView(jwt_Key)
+        registerVM.delegate = self
         
         productSearchField.delegate = self
         
-        NotificationCenter.default.addObserver(self, selector: #selector(writeTemporyCartList), name: UIApplication.willResignActiveNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(clearCartList), name: Notification.Name("CLEAR_CART_LIST"), object: nil)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(updateOrderStatus), name: Notification.Name("RELOAD_PRODUCT_VIEW"), object: nil)
         
         setupRefreshController()
+        
     }
     
     internal func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
@@ -133,10 +147,23 @@ class HomeViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        //Pendding cart item count
-        getPenddingCartItem()
-        
         registerForKeyboardEvent()
+    
+        getCurrentUserIdByUserName()
+        
+        setupWillAppearIndicatorView()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 2.5) {
+            
+            self.loadProductList()
+            self.loadPendingOrders()
+            self.willAppearIndicatorView.stopAnimating()
+            
+        }
         
     }
     
@@ -144,8 +171,14 @@ class HomeViewController: UIViewController {
         super.viewWillDisappear(animated)
         
         disappearFromKeyboardEvent()
-        writeTemporyCartList()
+        
         setDataCartVC()
+        
+        productList.removeAll()
+        pendingOrderList.removeAll()
+        
+        productView.reloadData()
+        
     }
     
     fileprivate func modifiyViewComponent(){
@@ -277,23 +310,6 @@ class HomeViewController: UIViewController {
 
     }
     
-    fileprivate func getPenddingCartItem(){
-        
-        if let data = try? Data(contentsOf: dataFilePath!){
-            let decode = PropertyListDecoder()
-            
-            do {
-                let getCartList = try decode.decode([Product].self, from: data)
-                for cartItem in getCartList {
-                    cartList[cartItem.id!] = cartItem
-                }
-                cartProductCount.text = "\(cartList.count)"
-            } catch {
-                print("Error decoding cart list \(error)")
-            }
-        }
-    }
-    
     fileprivate func setDataCartVC(){
         guard let viewControllers = tabBarController?.viewControllers else { return }
         guard let cartVC = viewControllers[1] as? CartViewController else { return }
@@ -306,25 +322,6 @@ class HomeViewController: UIViewController {
         
         cartVC.setCartList = cartData
         cartVC.delegate = self
-    }
-    
-    @objc fileprivate func writeTemporyCartList(){
-        let encoder = PropertyListEncoder()
-
-        do {
-            var temporyList = [Product]()
-            
-            for cartProduct in cartList {
-                temporyList.append(cartProduct.value)
-            }
-            
-            let data = try encoder.encode(temporyList)
-            try data.write(to: dataFilePath!)
-
-
-        } catch {
-            print("Error encoding cart list \(error)")
-        }
     }
     
     fileprivate func setupRefreshController(){
@@ -413,47 +410,195 @@ class HomeViewController: UIViewController {
         backgroundBlackView.removeFromSuperview()
         productSearchField.text = ""
     }
+
+    @objc fileprivate func clearCartList(){
+        cartList.removeAll()
+        cartProductCount.text = String(cartList.count)
+    }
+    
+    fileprivate func calculateTimeDifferent(OrderDate date : String) -> Int{
+    
+        let dateFormatter = DateFormatter()
+        dateFormatter.locale = Locale(identifier: "en_US_POSIX") // set locale to reliable US_POSIX
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+        let date = dateFormatter.date(from:date)
+
+        let diffs = Calendar.current.dateComponents([.minute], from: date!, to: Date())
+        return diffs.minute!
+    }
+    
+    fileprivate func presentOrderConfirmationVC(TimeRemaining time : Int,Progress count : Int,OrderId id : Int) {
+        
+        let orderSummeryVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(identifier: "ORDER_CONFIRMATION") as! OrderConfirmationViewController
+        
+        orderSummeryVC.modalPresentationStyle = .fullScreen
+        
+        orderSummeryVC.orderId = id
+        orderSummeryVC.timeRemaining = time
+        orderSummeryVC.progressCount = count
+        
+        let transition = CATransition()
+        transition.duration = 0.7
+        transition.type = .fade
+        transition.subtype = .fromLeft
+        transition.timingFunction = CAMediaTimingFunction(name: .easeIn)
+        self.view.window!.layer.add(transition, forKey: kCATransition)
+        
+        self.dismiss(animated: true) {
+            self.present(orderSummeryVC, animated: false) {
+                
+                orderSummeryVC.setupNavigationBar()
+                orderSummeryVC.orderButton.isHidden = true
+                
+                orderSummeryVC.changeLayoutHeight()
+
+            }
+        }
+    }
+    
+    fileprivate func setupActivityIndicator() {
+        
+        clickIndicatorView = NVActivityIndicatorView(frame: .zero, type: .lineSpinFadeLoader, color: UIColor(named: "Button_Background_Color"), padding: 0)
+        
+        clickIndicatorView.translatesAutoresizingMaskIntoConstraints = false
+        
+        view.addSubview(clickIndicatorView)
+        
+        NSLayoutConstraint.activate([
+            clickIndicatorView.widthAnchor.constraint(equalToConstant: 50),
+            clickIndicatorView.heightAnchor.constraint(equalToConstant: 50),
+            clickIndicatorView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            clickIndicatorView.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
+        
+        clickIndicatorView.startAnimating()
+    }
+    
+    @objc fileprivate func updateOrderStatus(_ notification : Notification){
+        let ord_id = notification.object as! Int
+        orderVM.updateActivityStatusByOID(Order_Id: ord_id)
+    }
+    
+    fileprivate func getCurrentUserIdByUserName(){
+        let userName = userDefaults.object(forKey: "USER_NAME") as! String
+        registerVM.getProfileInfoByUserName(UserName: userName)
+    }
+    
+    fileprivate func loadPendingOrders(){
+        orderVM.getAllPendingOrderByProfileId(ProfileId: profile_Id)
+    }
+    
+    fileprivate func setupWillAppearIndicatorView(){
+        willAppearIndicatorView = NVActivityIndicatorView(frame: .zero, type: .lineSpinFadeLoader, color: UIColor(named: "LightBlack_Color"), padding: 2)
+        
+        willAppearIndicatorView.translatesAutoresizingMaskIntoConstraints = false
+        
+        view.addSubview(willAppearIndicatorView)
+        
+        NSLayoutConstraint.activate([
+            willAppearIndicatorView.widthAnchor.constraint(equalToConstant: 50),
+            willAppearIndicatorView.heightAnchor.constraint(equalToConstant: 50),
+            willAppearIndicatorView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            willAppearIndicatorView.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
+        
+        willAppearIndicatorView.startAnimating()
+        
+    }
 }
 
 extension HomeViewController : UICollectionViewDelegate,UICollectionViewDataSource {
     
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return 2
+    }
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return productList.count
+        
+        if section == 0{
+            return pendingOrderList.count
+        } else {
+            return productList.count
+        }
+        
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
-        let productCell = productView.dequeueReusableCell(withReuseIdentifier: "PRODUCT_CELL", for: indexPath) as! ProductViewCell
-        productCell.product = productList[indexPath.row] as Product
-        productCell.addCartButton.tag = indexPath.row
-        productCell.addCartButton.addTarget(self, action: #selector(addToCartButtonDidPressed), for: .touchUpInside)
-        
-        
-        return productCell
+        if indexPath.section == 0{
+            let orderSummeryCell = productView.dequeueReusableCell(withReuseIdentifier: "ORDER_SUMMERY", for: indexPath) as! OrderConfirmationViewCell
+            let details = pendingOrderList[indexPath.row] as Order
+            
+            let timeDifferent = calculateTimeDifferent(OrderDate: details.date)
+            
+            orderSummeryCell.progressCount = timeDifferent
+            orderSummeryCell.timeRemaining = (45 - timeDifferent)
+            orderSummeryCell.orderId = details.id
+            
+            return orderSummeryCell
+        } else {
+            let productCell = productView.dequeueReusableCell(withReuseIdentifier: "PRODUCT_CELL", for: indexPath) as! ProductViewCell
+            productCell.product = productList[indexPath.row] as Product
+            productCell.addCartButton.tag = indexPath.row
+            productCell.addCartButton.addTarget(self, action: #selector(addToCartButtonDidPressed), for: .touchUpInside)
+            
+            
+            return productCell
+        }
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let productVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(identifier: "VIEW_PRODUCT") as! ProductViewController
-        productVC.modalTransitionStyle = .crossDissolve
-        productVC.modalPresentationStyle = .formSheet
-        productVC.getProductDetails = productList[indexPath.row] as Product
-        productVC.cartDelegate = self
-        present(productVC, animated: true, completion: nil)
+        if indexPath.section == 0 {
+            
+            let oCV_Cell = productView.cellForItem(at: indexPath) as! OrderConfirmationViewCell
+            let details = pendingOrderList[indexPath.row] as Order
+            
+            setupActivityIndicator()
+            
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1.5) {
+                self.clickIndicatorView.stopAnimating()
+                self.presentOrderConfirmationVC(TimeRemaining: oCV_Cell.timeRemaining, Progress: oCV_Cell.progressCount, OrderId: details.id)
+            }
+            
+            
+        } else {
+            let productVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(identifier: "VIEW_PRODUCT") as! ProductViewController
+            productVC.modalTransitionStyle = .crossDissolve
+            productVC.modalPresentationStyle = .formSheet
+            productVC.getProductDetails = productList[indexPath.row] as Product
+            productVC.cartDelegate = self
+            present(productVC, animated: true, completion: nil)
+        }
     }
 }
 
 extension HomeViewController : UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: (productView.frame.width - 15) / 2, height: 290)
+        if indexPath.section == 0 {
+            return CGSize(width: (productView.frame.width - 20) , height: 110)
+        } else {
+            return CGSize(width: (productView.frame.width - 15) / 2, height: 290)
+        }
+        
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
-        return UIEdgeInsets(top: 10, left: 5, bottom: 10, right: 5)
+        if section == 0 {
+            return UIEdgeInsets(top: 5, left: 10, bottom: 5, right: 10)
+        } else {
+            return UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5)
+        }
+        
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
-        return CGFloat(5.0)
+        if section == 0 {
+            return CGFloat(10)
+        } else {
+            return CGFloat(10)
+        }
+        
     }
 }
 
@@ -526,4 +671,48 @@ extension HomeViewController : ProductDelegate {
         }
         productView.reloadData()
     }
+}
+
+extension HomeViewController : RegistrationDelegate {
+    func getResponse(_ response: ApiResponse) { }
+    
+    func getUniqueFieldResult(_ field: String, _ result: Bool) { }
+    
+    func getProfileInfo(_ profile: Profile?) {
+        
+        guard let details = profile else { return }
+        
+        if let pro_Id = details.id {
+            self.profile_Id = pro_Id
+        }
+    }
+}
+
+extension HomeViewController : OrderDelegate {
+    func updateActiveStatus(Updated result: Bool) {
+        DispatchQueue.main.async {
+            if result {
+                self.loadPendingOrders()
+                self.productView.reloadData()
+            }
+        }
+    }
+    
+    func showResponseCode(HttpCode code: Int) {
+        
+    }
+    
+    func getOrderInfo(Order info: Order) { }
+    
+    func getOrderDetailInfo(OrderDetails list: [OrderDetails]) { }
+    
+    func getAllPendingOrders(List list: [Order]) {
+        self.pendingOrderList = list
+        
+        DispatchQueue.main.async {
+            self.productView.reloadData()
+        }
+    }
+    
+    
 }

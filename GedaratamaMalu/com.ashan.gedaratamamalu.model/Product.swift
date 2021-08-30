@@ -41,7 +41,7 @@ struct Product : Codable {
         date = try values.decodeIfPresent(String.self, forKey: .date)
         category = try values.decodeIfPresent(Category.self, forKey: .category)
         supplier = try values.decodeIfPresent(Supplier.self, forKey: .supplier)
-        qty = try values.decodeIfPresent(Int.self, forKey: .qty)
+        qty = try values.decodeIfPresent(Int.self, forKey: .qty) ?? 0
         productImage = try values.decodeIfPresent([ProductImage].self, forKey: .productImage)
     }
     

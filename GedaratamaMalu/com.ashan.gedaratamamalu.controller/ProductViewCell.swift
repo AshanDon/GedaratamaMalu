@@ -57,6 +57,9 @@ class ProductViewCell: UICollectionViewCell {
         
         addCartButton.layer.cornerRadius = addCartButton.frame.height / 2
         
+        contentView.layer.cornerRadius = CGFloat(10)
+        contentView.layer.masksToBounds = true
+    
     }
     
     
