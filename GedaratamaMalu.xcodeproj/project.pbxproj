@@ -21,6 +21,11 @@
 		6321D81D25C14733004D3144 /* AccountDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6321D81C25C14733004D3144 /* AccountDetailViewController.swift */; };
 		6323281D26D439A400B9037E /* guidelines.gif in Resources */ = {isa = PBXBuildFile; fileRef = 6323281C26D439A400B9037E /* guidelines.gif */; };
 		6323282226D44D2400B9037E /* scooter-courier.gif in Resources */ = {isa = PBXBuildFile; fileRef = 6323282126D44D2400B9037E /* scooter-courier.gif */; };
+		632BA75D26DD2C6000CDB452 /* HomeCategoryViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632BA75B26DD2C6000CDB452 /* HomeCategoryViewCell.swift */; };
+		632BA75E26DD2C6000CDB452 /* HomeCategoryViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 632BA75C26DD2C6000CDB452 /* HomeCategoryViewCell.xib */; };
+		632BA76926DD428300CDB452 /* CategoryViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632BA76726DD428300CDB452 /* CategoryViewCell.swift */; };
+		632BA76A26DD428300CDB452 /* CategoryViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 632BA76826DD428300CDB452 /* CategoryViewCell.xib */; };
+		632BA76F26DD753900CDB452 /* CategoryModelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632BA76E26DD753900CDB452 /* CategoryModelView.swift */; };
 		6330591D26C9963A00786402 /* MyCartViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6330591B26C9963A00786402 /* MyCartViewCell.swift */; };
 		6330591E26C9963A00786402 /* MyCartViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 6330591C26C9963A00786402 /* MyCartViewCell.xib */; };
 		633296B6263409C7006435E1 /* ApiResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633296B5263409C7006435E1 /* ApiResponse.swift */; };
@@ -124,6 +129,12 @@
 		6321D81C25C14733004D3144 /* AccountDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountDetailViewController.swift; sourceTree = "<group>"; };
 		6323281C26D439A400B9037E /* guidelines.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = guidelines.gif; sourceTree = "<group>"; };
 		6323282126D44D2400B9037E /* scooter-courier.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = "scooter-courier.gif"; sourceTree = "<group>"; };
+		632BA75B26DD2C6000CDB452 /* HomeCategoryViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeCategoryViewCell.swift; sourceTree = "<group>"; };
+		632BA75C26DD2C6000CDB452 /* HomeCategoryViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = HomeCategoryViewCell.xib; sourceTree = "<group>"; };
+		632BA76326DD3B8100CDB452 /* LucidaGrande.ttc */ = {isa = PBXFileReference; lastKnownFileType = file; path = LucidaGrande.ttc; sourceTree = "<group>"; };
+		632BA76726DD428300CDB452 /* CategoryViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryViewCell.swift; sourceTree = "<group>"; };
+		632BA76826DD428300CDB452 /* CategoryViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = CategoryViewCell.xib; sourceTree = "<group>"; };
+		632BA76E26DD753900CDB452 /* CategoryModelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryModelView.swift; sourceTree = "<group>"; };
 		6330591B26C9963A00786402 /* MyCartViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyCartViewCell.swift; sourceTree = "<group>"; };
 		6330591C26C9963A00786402 /* MyCartViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MyCartViewCell.xib; sourceTree = "<group>"; };
 		633296B5263409C7006435E1 /* ApiResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiResponse.swift; sourceTree = "<group>"; };
@@ -290,6 +301,24 @@
 			path = com.ashan.gedaratamamalu.model;
 			sourceTree = "<group>";
 		};
+		632BA76226DD3B5500CDB452 /* custom_Font */ = {
+			isa = PBXGroup;
+			children = (
+				632BA76326DD3B8100CDB452 /* LucidaGrande.ttc */,
+			);
+			path = custom_Font;
+			sourceTree = "<group>";
+		};
+		632BA77326DD909600CDB452 /* custom_Gif */ = {
+			isa = PBXGroup;
+			children = (
+				63499BE826CAE98200AB4BCA /* fish3.gif */,
+				6323282126D44D2400B9037E /* scooter-courier.gif */,
+				6323281C26D439A400B9037E /* guidelines.gif */,
+			);
+			path = custom_Gif;
+			sourceTree = "<group>";
+		};
 		63947FA7263178F300360832 /* com.ashan.gedaratamamalu.viewModel */ = {
 			isa = PBXGroup;
 			children = (
@@ -300,6 +329,7 @@
 				631523AD26849657006A4CFF /* AddressModelView.swift */,
 				6317AB082698EA5C00D59335 /* OrderModelView.swift */,
 				6348332626C53B94000BA036 /* PaymentModelView.swift */,
+				632BA76E26DD753900CDB452 /* CategoryModelView.swift */,
 			);
 			path = com.ashan.gedaratamamalu.viewModel;
 			sourceTree = "<group>";
@@ -318,6 +348,10 @@
 				636360B82660DA4C00CF8D81 /* CardDetailViewCell.xib */,
 				6330591C26C9963A00786402 /* MyCartViewCell.xib */,
 				63F3E96226D66AB80013471C /* OrderConfirmationViewCell.xib */,
+				632BA75B26DD2C6000CDB452 /* HomeCategoryViewCell.swift */,
+				632BA75C26DD2C6000CDB452 /* HomeCategoryViewCell.xib */,
+				632BA76726DD428300CDB452 /* CategoryViewCell.swift */,
+				632BA76826DD428300CDB452 /* CategoryViewCell.xib */,
 			);
 			path = com.ashan.gedaratamamalu.view;
 			sourceTree = "<group>";
@@ -325,9 +359,8 @@
 		63A8A2D02599FD6500921E83 /* com.ashan.gedaratamamalu.supporting */ = {
 			isa = PBXGroup;
 			children = (
-				63499BE826CAE98200AB4BCA /* fish3.gif */,
-				6323282126D44D2400B9037E /* scooter-courier.gif */,
-				6323281C26D439A400B9037E /* guidelines.gif */,
+				632BA77326DD909600CDB452 /* custom_Gif */,
+				632BA76226DD3B5500CDB452 /* custom_Font */,
 				63BE381325A3BE4E00937C35 /* Extension.swift */,
 				635B10BB266C1BA10079CEA0 /* MonthYearPickerView.swift */,
 				633EEF10267E8C190007ED20 /* ShowCustomAlertMessage.swift */,
@@ -534,6 +567,8 @@
 				63F3E96426D66AB80013471C /* OrderConfirmationViewCell.xib in Resources */,
 				63499BE926CAE98300AB4BCA /* fish3.gif in Resources */,
 				63D4C23C25990F0700BF9D7E /* Assets.xcassets in Resources */,
+				632BA75E26DD2C6000CDB452 /* HomeCategoryViewCell.xib in Resources */,
+				632BA76A26DD428300CDB452 /* CategoryViewCell.xib in Resources */,
 				63D4C23A25990F0500BF9D7E /* Main.storyboard in Resources */,
 				636360BA2660DA4C00CF8D81 /* CardDetailViewCell.xib in Resources */,
 				6343F0EE265FEFCE0053487D /* CheckoutPayViewCell.xib in Resources */,
@@ -701,10 +736,13 @@
 				6316FA0625AB98C800824BF4 /* MobileVerificationViewController.swift in Sources */,
 				6348332C26C541EB000BA036 /* Payment.swift in Sources */,
 				63ED251F25B9C1AB00D8DDA6 /* CartViewController.swift in Sources */,
+				632BA76926DD428300CDB452 /* CategoryViewCell.swift in Sources */,
+				632BA76F26DD753900CDB452 /* CategoryModelView.swift in Sources */,
 				6307D78B262580EB0047694E /* Authentication.swift in Sources */,
 				6348332726C53B94000BA036 /* PaymentModelView.swift in Sources */,
 				63C8FE362633755B00D7521A /* ProfileType.swift in Sources */,
 				635840CB25BC1C610058971D /* LaunchSideMenu.swift in Sources */,
+				632BA75D26DD2C6000CDB452 /* HomeCategoryViewCell.swift in Sources */,
 				63D0B76F25BB743C0089FB0C /* AccountViewController.swift in Sources */,
 				633296B6263409C7006435E1 /* ApiResponse.swift in Sources */,
 				630855C8259B8A0F0072F431 /* SwipingViewCell.swift in Sources */,

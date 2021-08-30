@@ -56,6 +56,7 @@ class ProductViewCell: UICollectionViewCell {
     private func updateCellComponent(){
         
         addCartButton.layer.cornerRadius = addCartButton.frame.height / 2
+        addCartButton.spacing(Text_Image: CGFloat(5))
         
         contentView.layer.cornerRadius = CGFloat(10)
         contentView.layer.masksToBounds = true

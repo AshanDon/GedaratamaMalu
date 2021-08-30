@@ -157,4 +157,34 @@ class ProductViewModel{
                     }
                    }
     }
+    
+    func getAllProductByCID(CategoryId id : Int){
+        
+        var url : String {
+            return "\(baseURL)/product/find/Cate_id/\(id)"
+        }
+        
+        AF.request(url,
+                   method: .get,
+                   parameters: nil,
+                   encoding: URLEncoding.queryString,
+                   headers: getHTTPHeaders())
+            .responseJSON { [weak self] (resJson) in
+                
+                guard let strongeSelf = self else { return }
+                
+                if let error = resJson.error {
+                    print(error.localizedDescription)
+                }
+                
+                guard let data = resJson.data else { return }
+                
+                do{
+                    let list = try JSONDecoder().decode([Product].self, from: data)
+                    strongeSelf.delegate.getProductList?(productList: list as [AnyObject])
+                } catch let decoderExp {
+                    print(decoderExp.localizedDescription)
+                }
+            }
+    }
 }

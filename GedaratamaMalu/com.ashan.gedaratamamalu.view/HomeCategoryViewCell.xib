@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="CATEGORY_HOME_CELL" id="gTV-IL-0wX" customClass="HomeCategoryViewCell" customModule="GedaratamaMalu" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="355" height="166"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                <rect key="frame" x="0.0" y="0.0" width="355" height="166"/>
+                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="dod-V6-cNG">
+                        <rect key="frame" x="0.0" y="0.0" width="355" height="166"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ae2-2D-fiw">
+                                <rect key="frame" x="10" y="8" width="213" height="42"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="42" id="cDq-eP-khW"/>
+                                    <constraint firstAttribute="width" constant="213" id="eCJ-Il-jdS"/>
+                                </constraints>
+                                <string key="text">What would you like to
+order, Ashan?</string>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" name="Black_Color"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="none" translatesAutoresizingMaskIntoConstraints="NO" id="gnw-jM-BFu">
+                                <rect key="frame" x="0.0" y="56" width="355" height="100"/>
+                                <color key="backgroundColor" name="CategoryHome_Color"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="100" id="dLb-lX-zm7"/>
+                                </constraints>
+                                <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="10" minimumInteritemSpacing="10" id="PF8-S5-mBj">
+                                    <size key="itemSize" width="128" height="100"/>
+                                    <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                                    <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                                    <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                </collectionViewFlowLayout>
+                            </collectionView>
+                        </subviews>
+                        <color key="backgroundColor" name="CategoryHome_Color"/>
+                        <constraints>
+                            <constraint firstAttribute="bottom" secondItem="gnw-jM-BFu" secondAttribute="bottom" constant="10" id="1Uf-ox-j1r"/>
+                            <constraint firstItem="gnw-jM-BFu" firstAttribute="top" secondItem="ae2-2D-fiw" secondAttribute="bottom" constant="6" id="6zf-kV-Okz"/>
+                            <constraint firstItem="gnw-jM-BFu" firstAttribute="leading" secondItem="dod-V6-cNG" secondAttribute="leading" id="EGy-cf-8WA"/>
+                            <constraint firstAttribute="trailing" secondItem="gnw-jM-BFu" secondAttribute="trailing" id="Z09-nC-axq"/>
+                            <constraint firstItem="ae2-2D-fiw" firstAttribute="top" secondItem="dod-V6-cNG" secondAttribute="top" constant="8" id="a2Q-xR-Jw4"/>
+                            <constraint firstItem="ae2-2D-fiw" firstAttribute="leading" secondItem="dod-V6-cNG" secondAttribute="leading" constant="10" id="gnY-k4-7te"/>
+                        </constraints>
+                    </view>
+                </subviews>
+            </view>
+            <viewLayoutGuide key="safeArea" id="ZTg-uK-7eu"/>
+            <constraints>
+                <constraint firstItem="dod-V6-cNG" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" id="1jf-BI-Aic"/>
+                <constraint firstAttribute="trailing" secondItem="dod-V6-cNG" secondAttribute="trailing" id="PVt-VY-WkR"/>
+                <constraint firstAttribute="bottom" secondItem="dod-V6-cNG" secondAttribute="bottom" id="s45-7w-Rfk"/>
+                <constraint firstItem="dod-V6-cNG" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" id="w3h-vP-Dk2"/>
+            </constraints>
+            <connections>
+                <outlet property="categoryCollectionView" destination="gnw-jM-BFu" id="2Rh-o5-gEn"/>
+                <outlet property="titleLabel" destination="ae2-2D-fiw" id="Vyp-y9-lBz"/>
+            </connections>
+            <point key="canvasLocation" x="-254.34782608695653" y="-21.428571428571427"/>
+        </collectionViewCell>
+    </objects>
+    <resources>
+        <namedColor name="Black_Color">
+            <color red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="CategoryHome_Color">
+            <color red="0.42745098039215684" green="0.44705882352941173" blue="0.47058823529411764" alpha="0.80000000000000004" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+    </resources>
+</document>

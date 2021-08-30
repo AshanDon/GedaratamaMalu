@@ -37,6 +37,7 @@ class HomeViewController: UIViewController {
     fileprivate var orderVM : OrderModelView!
     fileprivate var registerVM : RegisterModelView!
     fileprivate var profile_Id : Int = Int()
+    fileprivate var firstName : String!
     
     
     
@@ -107,6 +108,7 @@ class HomeViewController: UIViewController {
         
         self.productView.register(UINib(nibName: "ProductViewCell", bundle: nil), forCellWithReuseIdentifier: "PRODUCT_CELL")
         self.productView.register(UINib(nibName: "OrderConfirmationViewCell", bundle: nil), forCellWithReuseIdentifier: "ORDER_SUMMERY")
+        self.productView.register(UINib(nibName: "HomeCategoryViewCell", bundle: nil), forCellWithReuseIdentifier: "CATEGORY_HOME_CELL")
         
         productView.delegate = self
         
@@ -128,6 +130,8 @@ class HomeViewController: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(clearCartList), name: Notification.Name("CLEAR_CART_LIST"), object: nil)
         
         NotificationCenter.default.addObserver(self, selector: #selector(updateOrderStatus), name: Notification.Name("RELOAD_PRODUCT_VIEW"), object: nil)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(loadProductByCID), name: Notification.Name("GET_PRODUCT_BY_CID"), object: nil)
         
         setupRefreshController()
         
@@ -505,18 +509,31 @@ class HomeViewController: UIViewController {
         willAppearIndicatorView.startAnimating()
         
     }
+    
+    @objc fileprivate func loadProductByCID(_ sender : Notification){
+        let categoryId = sender.object as! Int
+        
+        if categoryId == 0 {
+            productVM.getAllProductDetails()
+        } else {
+            productVM.getAllProductByCID(CategoryId: categoryId)
+        }
+    }
 }
 
+//MARK:- UICollectionViewDelegate,UICollectionViewDataSource
 extension HomeViewController : UICollectionViewDelegate,UICollectionViewDataSource {
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return 2
+        return 3
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         
         if section == 0{
             return pendingOrderList.count
+        } else if section == 1 {
+            return 1
         } else {
             return productList.count
         }
@@ -536,6 +553,12 @@ extension HomeViewController : UICollectionViewDelegate,UICollectionViewDataSour
             orderSummeryCell.orderId = details.id
             
             return orderSummeryCell
+        } else if indexPath.section == 1 {
+            let categoryHomeCell = productView.dequeueReusableCell(withReuseIdentifier: "CATEGORY_HOME_CELL", for: indexPath) as! HomeCategoryViewCell
+            if let name = self.firstName{
+                categoryHomeCell.firstName = name
+            }
+            return categoryHomeCell
         } else {
             let productCell = productView.dequeueReusableCell(withReuseIdentifier: "PRODUCT_CELL", for: indexPath) as! ProductViewCell
             productCell.product = productList[indexPath.row] as Product
@@ -560,8 +583,7 @@ extension HomeViewController : UICollectionViewDelegate,UICollectionViewDataSour
                 self.presentOrderConfirmationVC(TimeRemaining: oCV_Cell.timeRemaining, Progress: oCV_Cell.progressCount, OrderId: details.id)
             }
             
-            
-        } else {
+        } else if indexPath.section == 2  {
             let productVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(identifier: "VIEW_PRODUCT") as! ProductViewController
             productVC.modalTransitionStyle = .crossDissolve
             productVC.modalPresentationStyle = .formSheet
@@ -572,11 +594,14 @@ extension HomeViewController : UICollectionViewDelegate,UICollectionViewDataSour
     }
 }
 
+//MARK:- UICollectionViewDelegateFlowLayout
 extension HomeViewController : UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         if indexPath.section == 0 {
-            return CGSize(width: (productView.frame.width - 20) , height: 110)
+            return CGSize(width: (productView.frame.width - 10) , height: 110)
+        } else if indexPath.section == 1 {
+            return CGSize(width: (productView.frame.width - 10) , height: 166)
         } else {
             return CGSize(width: (productView.frame.width - 15) / 2, height: 290)
         }
@@ -585,15 +610,18 @@ extension HomeViewController : UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
         if section == 0 {
-            return UIEdgeInsets(top: 5, left: 10, bottom: 5, right: 10)
+            return UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5)
+        } else if section == 1 {
+            return UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5)
         } else {
             return UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5)
         }
-        
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
         if section == 0 {
+            return CGFloat(10)
+        } else if section == 1 {
             return CGFloat(10)
         } else {
             return CGFloat(10)
@@ -602,6 +630,7 @@ extension HomeViewController : UICollectionViewDelegateFlowLayout {
     }
 }
 
+//MARK:- UISearchBarDelegate
 extension HomeViewController : UISearchBarDelegate{
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar){
@@ -619,6 +648,7 @@ extension HomeViewController : UISearchBarDelegate{
     
 }
 
+//MARK :- CartDelegete
 extension HomeViewController : CartDelegete {
     
     func addedItemToCart(_ item: Product) {
@@ -647,6 +677,7 @@ extension HomeViewController : CartDelegete {
     
 }
 
+//MARK:- CartListDelegate
 extension HomeViewController : CartListDelegate {
     
     func updateCartList(_ list: [Product]) {
@@ -661,18 +692,24 @@ extension HomeViewController : CartListDelegate {
     }
 }
 
+//MARK:- ProductDelegate
 extension HomeViewController : ProductDelegate {
     
     func getProductList(productList: [AnyObject]) {
-        if !productList.isEmpty{
-            self.productList = productList as! [Product]
-        } else if productList.isEmpty && !productSearchField.text!.isEmpty {
-            setupBlackView(warningImage: UIImage(named: "NotFound")!, messageTitle: "Product not found!")
+        DispatchQueue.main.async {
+            if !productList.isEmpty{
+                self.productList = productList as! [Product]
+            } else if productList.isEmpty && !self.productSearchField.text!.isEmpty {
+                self.setupBlackView(warningImage: UIImage(named: "NotFound")!, messageTitle: "Product not found!")
+            } else if productList.isEmpty{
+                self.productList.removeAll()
+            }
+            self.productView.reloadData()
         }
-        productView.reloadData()
     }
 }
 
+//MARK:- RegistrationDelegate
 extension HomeViewController : RegistrationDelegate {
     func getResponse(_ response: ApiResponse) { }
     
@@ -682,12 +719,15 @@ extension HomeViewController : RegistrationDelegate {
         
         guard let details = profile else { return }
         
-        if let pro_Id = details.id {
+        if let pro_Id = details.id,
+           let firstName = details.firstName{
             self.profile_Id = pro_Id
+            self.firstName = firstName
         }
     }
 }
 
+//MARK:- OrderDelegate
 extension HomeViewController : OrderDelegate {
     func updateActiveStatus(Updated result: Bool) {
         DispatchQueue.main.async {

@@ -422,3 +422,10 @@ extension UIImage {
         return animation
     }
 }
+
+extension UIButton {
+    func spacing(Text_Image spacing : CGFloat){
+        self.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: spacing);
+        self.titleEdgeInsets = UIEdgeInsets(top: 0, left: spacing, bottom: 0, right: 0);
+    }
+}

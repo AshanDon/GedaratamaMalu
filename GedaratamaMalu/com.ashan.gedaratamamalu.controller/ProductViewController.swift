@@ -64,7 +64,7 @@ class ProductViewController: UIViewController {
         
         //UIButton
         addCartButton.layer.cornerRadius = addCartButton.frame.height / 2
-        
+        addCartButton.spacing(Text_Image: CGFloat(5))
     }
     
     @objc fileprivate func cancelButtonPressed(){
@@ -73,7 +73,7 @@ class ProductViewController: UIViewController {
     
     
     @IBAction func qtyChange(_ sender: UIStepper) {
-        qtyLabel.text = "Qty \(Int(sender.value))"
+        qtyLabel.text = "\(Int(sender.value)) Kg"
     }
     
     
