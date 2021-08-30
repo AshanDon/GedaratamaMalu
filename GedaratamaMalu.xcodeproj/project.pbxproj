@@ -232,6 +232,7 @@
 		6309F23625AF6D5C00C262C2 /* com.ashan.gedaratamamalu.controller */ = {
 			isa = PBXGroup;
 			children = (
+				63F3E96126D66AB80013471C /* OrderConfirmationViewCell.swift */,
 				6343F0EB265FEFCE0053487D /* CheckoutPayViewCell.swift */,
 				636360B72660DA4C00CF8D81 /* CardDetailViewCell.swift */,
 				634CFCDA265AC4DD0064A2D6 /* BasketCell.swift */,
@@ -316,7 +317,6 @@
 				6343F0EC265FEFCE0053487D /* CheckoutPayViewCell.xib */,
 				636360B82660DA4C00CF8D81 /* CardDetailViewCell.xib */,
 				6330591C26C9963A00786402 /* MyCartViewCell.xib */,
-				63F3E96126D66AB80013471C /* OrderConfirmationViewCell.swift */,
 				63F3E96226D66AB80013471C /* OrderConfirmationViewCell.xib */,
 			);
 			path = com.ashan.gedaratamamalu.view;
